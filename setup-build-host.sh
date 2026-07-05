@@ -12,6 +12,7 @@ apt-get update
 apt-get install -y \
   live-build \
   debootstrap \
+  debian-archive-keyring \
   squashfs-tools \
   xorriso \
   syslinux \

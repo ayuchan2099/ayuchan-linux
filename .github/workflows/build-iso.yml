@@ -46,6 +46,9 @@ jobs:
 
       - name: Install build dependencies
         run: |
+          # Ubuntu runner 上构建 Debian ISO 需要 Debian 源与密钥
+          sudo apt-get update
+          sudo apt-get install -y debian-archive-keyring
           chmod +x setup-build-host.sh build.sh auto/config
           chmod +x config/hooks/normal/*.chroot 2>/dev/null || true
           sudo ./setup-build-host.sh
