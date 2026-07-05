@@ -1,14 +1,11 @@
 name: Build Ayuchan ISO
 
 on:
-  # 在 GitHub 网页 Actions 页手动点 "Run workflow"
   workflow_dispatch:
-  # 推送版本标签时自动构建并发布 Release，例如: git tag v1.0.0 && git push origin v1.0.0
   push:
     tags:
       - 'v*'
 
-# 发布 Release 需要写权限
 permissions:
   contents: write
 
@@ -19,6 +16,10 @@ concurrency:
 jobs:
   build-iso:
     runs-on: ubuntu-24.04
+    # 在 Debian bookworm 容器内构建，避免 Ubuntu runner 上 live-build 源配置错误
+    container:
+      image: debian:bookworm
+      options: --privileged
     timeout-minutes: 360
 
     steps:
@@ -27,38 +28,21 @@ jobs:
 
       - name: Free disk space
         run: |
-          echo "=== 清理前 ==="
+          echo "=== 磁盘使用 ==="
           df -h /
-          # GitHub 标准 runner 只有约 14GB 可用，KDE 构建需要尽量腾出空间
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /usr/local/lib/android
-          sudo rm -rf /opt/ghc
-          sudo rm -rf /opt/hostedtoolcache/CodeQL
-          sudo rm -rf /usr/local/share/boost
-          sudo rm -rf /usr/share/swift
-          sudo rm -rf /usr/local/.ghcup
-          sudo rm -rf /usr/share/miniconda
-          sudo rm -rf "$AGENT_TOOLSDIRECTORY" 2>/dev/null || true
-          sudo docker image prune --all --force 2>/dev/null || true
-          sudo apt-get clean
-          echo "=== 清理后 ==="
-          df -h /
+          apt-get clean || true
+          rm -rf /var/lib/apt/lists/* || true
 
       - name: Install build dependencies
         run: |
-          # Ubuntu runner 上构建 Debian ISO 需要 Debian 源与密钥
-          sudo apt-get update
-          sudo apt-get install -y debian-archive-keyring
+          apt-get update
+          apt-get install -y ca-certificates git
           chmod +x setup-build-host.sh build.sh auto/config
           chmod +x config/hooks/normal/*.chroot 2>/dev/null || true
-          sudo ./setup-build-host.sh
+          ./setup-build-host.sh
 
       - name: Build ISO
-        env:
-          LB_MODE: debian
-        run: |
-          echo "开始构建，预计 60–120 分钟..."
-          sudo -E ./build.sh
+        run: ./build.sh
 
       - name: Prepare release name
         id: meta

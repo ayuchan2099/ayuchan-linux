@@ -12,5 +12,3 @@ for f in /etc/apt/sources.list.d/debian.sources /etc/apt/sources.list.d/*.source
     sed -i 's/Components: \(.*\)/Components: \1 non-free-firmware contrib non-free/' "$f"
   fi
 done
-
-apt-get update
