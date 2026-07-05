@@ -1,0 +1,15 @@
+[Desktop Entry]
+Name=Ayuchan
+Name[zh_CN]=Ayuchan 主题
+Comment=Ayuchan Linux desktop theme
+Comment[zh_CN]=Ayuchan Linux 桌面主题
+X-KDE-PluginInfo-Author=ayuchan
+X-KDE-PluginInfo-Category=
+X-KDE-PluginInfo-Description=Ayuchan Linux look and feel
+X-KDE-PluginInfo-Email=
+X-KDE-PluginInfo-EnabledByDefault=true
+X-KDE-PluginInfo-License=GPLv2+
+X-KDE-PluginInfo-Name=com.ayuchan.lookandfeel
+X-KDE-PluginInfo-Version=1.0
+X-KDE-PluginInfo-Website=https://github.com/ayuchan/ayuchan-linux
+X-KDE-Plasma-LookAndFeelCategory=Global

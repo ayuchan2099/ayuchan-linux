@@ -1,0 +1,45 @@
+#!/bin/bash
+# 配置 fcitx5 为默认输入法
+set -e
+
+cat >> /etc/environment << 'EOF'
+GTK_IM_MODULE=fcitx
+QT_IM_MODULE=fcitx
+XMODIFIERS=@im=fcitx
+SDL_IM_MODULE=fcitx
+EOF
+
+mkdir -p /etc/skel/.config/fcitx5/conf
+cat > /etc/skel/.config/fcitx5/conf/classicui.conf << 'EOF'
+[ClassicUI]
+Font="Noto Sans CJK SC 12"
+MenuFont="Noto Sans CJK SC 12"
+TrayFont="Noto Sans CJK SC 10"
+UseTrayIcon=True
+EOF
+
+# 默认拼音输入法
+cat > /etc/skel/.config/fcitx5/profile << 'EOF'
+[Groups/0]
+Name=Default
+Default Layout=us
+DefaultIM=pinyin
+
+[Groups/0/Items/0]
+Name=keyboard-us
+Layout=
+
+[Groups/0/Items/1]
+Name=pinyin
+Layout=
+
+[GroupOrder]
+0=Default
+EOF
+
+if id ayuchan >/dev/null 2>&1; then
+  cp -a /etc/skel/.config/fcitx5 "/home/ayuchan/.config/" 2>/dev/null || true
+  chown -R ayuchan:ayuchan /home/ayuchan/.config/fcitx5 2>/dev/null || true
+fi
+
+im-config -n fcitx5 || true

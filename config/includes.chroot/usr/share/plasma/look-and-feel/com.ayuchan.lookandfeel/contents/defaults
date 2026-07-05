@@ -1,0 +1,17 @@
+[kdeglobals][General]
+ColorScheme=Ayuchan
+Name=Ayuchan
+widgetStyle=Breeze
+
+[kdeglobals][KDE]
+LookAndFeelPackage=com.ayuchan.lookandfeel
+
+[plasmarc][Theme]
+name=breeze-dark
+
+[Wallpaper][org.kde.image][General]
+Image=/usr/share/wallpapers/Ayuchan/contents/images/ayuchan.svg
+SlidePaths=/usr/share/wallpapers/Ayuchan/
+
+[ksplash][KSplash]
+Theme=org.kde.breeze.desktop

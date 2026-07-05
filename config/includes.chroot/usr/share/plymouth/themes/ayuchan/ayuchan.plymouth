@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Ayuchan
+Description=Ayuchan Linux boot animation
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/ayuchan
+ScriptFile=/usr/share/plymouth/themes/ayuchan/ayuchan.script

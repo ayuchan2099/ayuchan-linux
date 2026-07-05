@@ -1,0 +1,14 @@
+# live-build 产物
+*.iso
+*.iso.sha256
+build.log
+.cache/
+chroot/
+binary/
+config/bootstrap
+config/chroot_apt/
+config/package-lists/*.list.chroot~
+
+# CI 重命名后的 ISO
+ayuchan-linux-*.iso
+ayuchan-linux-*.iso.sha256

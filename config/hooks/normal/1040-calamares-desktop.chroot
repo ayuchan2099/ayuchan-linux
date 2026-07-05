@@ -1,0 +1,41 @@
+#!/bin/bash
+# 安装器桌面入口与权限
+set -e
+
+install -d /usr/share/applications
+
+cat > /usr/share/applications/calamares.desktop << 'EOF'
+[Desktop Entry]
+Type=Application
+Name=Install Ayuchan Linux
+Name[zh_CN]=安装 Ayuchan Linux
+Comment=Install Ayuchan Linux to your hard drive
+Comment[zh_CN]=将 Ayuchan Linux 安装到硬盘
+Icon=calamares
+Exec=pkexec calamares
+Terminal=false
+Categories=System;
+Keywords=install;calamares;ayuchan;
+EOF
+
+install -d /etc/polkit-1/rules.d
+cat > /etc/polkit-1/rules.d/49-nopasswd-calamares.rules << 'EOF'
+polkit.addRule(function(action, subject) {
+    if (action.id.indexOf("org.freedesktop.policykit.exec") == 0 &&
+        subject.isInGroup("sudo") &&
+        action.lookup("program") == "/usr/bin/calamares") {
+        return polkit.Result.YES;
+    }
+});
+EOF
+
+# 桌面快捷方式（Live 用户）
+for desk in /etc/skel/Desktop /home/ayuchan/Desktop; do
+  install -d "$desk"
+  cp /usr/share/applications/calamares.desktop "$desk/Install Ayuchan Linux.desktop"
+  chmod +x "$desk/Install Ayuchan Linux.desktop"
+done
+
+if id ayuchan >/dev/null 2>&1; then
+  chown -R ayuchan:ayuchan /home/ayuchan/Desktop 2>/dev/null || true
+fi

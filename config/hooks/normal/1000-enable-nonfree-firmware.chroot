@@ -1,0 +1,16 @@
+#!/bin/bash
+# 启用 non-free-firmware 源，改善笔记本 WiFi / 显卡驱动支持
+set -e
+
+if [[ -f /etc/apt/sources.list ]]; then
+  sed -i 's/ main$/ main contrib non-free non-free-firmware/' /etc/apt/sources.list
+fi
+
+for f in /etc/apt/sources.list.d/debian.sources /etc/apt/sources.list.d/*.sources; do
+  [[ -f "$f" ]] || continue
+  if grep -q 'Components:' "$f" && ! grep -q 'non-free-firmware' "$f"; then
+    sed -i 's/Components: \(.*\)/Components: \1 non-free-firmware contrib non-free/' "$f"
+  fi
+done
+
+apt-get update

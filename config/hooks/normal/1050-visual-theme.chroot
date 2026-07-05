@@ -1,0 +1,88 @@
+#!/bin/bash
+# 激活 Plymouth 开机动画、KDE 全局主题、SDDM 登录主题
+set -e
+
+WALLPAPER="/usr/share/wallpapers/Ayuchan/contents/images/ayuchan.svg"
+LOOKANDFEEL="com.ayuchan.lookandfeel"
+
+# --- Plymouth ---
+if command -v plymouth-set-default-theme >/dev/null 2>&1; then
+  plymouth-set-default-theme ayuchan
+  if command -v update-initramfs >/dev/null 2>&1; then
+    update-initramfs -u -k all || true
+  fi
+fi
+
+# --- SDDM 登录主题 ---
+mkdir -p /etc/sddm.conf.d
+cat > /etc/sddm.conf.d/ayuchan-theme.conf << 'EOF'
+[Theme]
+Current=ayuchan
+
+[General]
+DisplayServer=x11
+GreeterEnvironment=QT_IM_MODULE=fcitx
+EOF
+
+# --- 系统级 KDE 默认主题 ---
+mkdir -p /etc/xdg
+cat > /etc/xdg/kdeglobals << 'EOF'
+[KDE]
+LookAndFeelPackage=com.ayuchan.lookandfeel
+
+[General]
+ColorScheme=Ayuchan
+Name=Ayuchan
+widgetStyle=Breeze
+EOF
+
+# --- 新用户默认配置（/etc/skel）---
+mkdir -p /etc/skel/.config
+cat > /etc/skel/.config/kdeglobals << 'EOF'
+[KDE]
+LookAndFeelPackage=com.ayuchan.lookandfeel
+
+[General]
+ColorScheme=Ayuchan
+Name=Ayuchan
+widgetStyle=Breeze
+EOF
+
+cat > /etc/skel/.config/plasmarc << 'EOF'
+[Theme]
+name=breeze-dark
+EOF
+
+# --- 应用到 Live 用户 ayuchan ---
+apply_user_theme() {
+  local user="$1"
+  local user_home="/home/$user"
+  [[ -d "$user_home" ]] || return 0
+
+  install -d "$user_home/.config"
+  cp /etc/skel/.config/kdeglobals "$user_home/.config/"
+  cp /etc/skel/.config/plasmarc "$user_home/.config/"
+
+  if id "$user" >/dev/null 2>&1; then
+    chown -R "$user:$user" "$user_home/.config"
+  fi
+}
+
+apply_user_theme ayuchan
+
+# 尝试全局应用 Look-and-Feel（若工具存在）
+if command -v lookandfeeltool >/dev/null 2>&1; then
+  lookandfeeltool -a "$LOOKANDFEEL" || true
+fi
+
+# 锁屏壁纸
+mkdir -p /etc/skel/.config
+cat > /etc/skel/.config/kscreenlockerrc << EOF
+[Theme]
+Image=${WALLPAPER}
+EOF
+
+if [[ -d /home/ayuchan ]]; then
+  cp /etc/skel/.config/kscreenlockerrc /home/ayuchan/.config/ 2>/dev/null || true
+  chown ayuchan:ayuchan /home/ayuchan/.config/kscreenlockerrc 2>/dev/null || true
+fi

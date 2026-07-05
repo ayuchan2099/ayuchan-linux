@@ -1,0 +1,104 @@
+name: Build Ayuchan ISO
+
+on:
+  # 在 GitHub 网页 Actions 页手动点 "Run workflow"
+  workflow_dispatch:
+  # 推送版本标签时自动构建并发布 Release，例如: git tag v1.0.0 && git push origin v1.0.0
+  push:
+    tags:
+      - 'v*'
+
+# 发布 Release 需要写权限
+permissions:
+  contents: write
+
+concurrency:
+  group: build-iso-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-iso:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 360
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Free disk space
+        run: |
+          echo "=== 清理前 ==="
+          df -h /
+          # GitHub 标准 runner 只有约 14GB 可用，KDE 构建需要尽量腾出空间
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo rm -rf /usr/local/share/boost
+          sudo rm -rf /usr/share/swift
+          sudo rm -rf /usr/local/.ghcup
+          sudo rm -rf /usr/share/miniconda
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY" 2>/dev/null || true
+          sudo docker image prune --all --force 2>/dev/null || true
+          sudo apt-get clean
+          echo "=== 清理后 ==="
+          df -h /
+
+      - name: Install build dependencies
+        run: |
+          chmod +x setup-build-host.sh build.sh auto/config
+          chmod +x config/hooks/normal/*.chroot 2>/dev/null || true
+          sudo ./setup-build-host.sh
+
+      - name: Build ISO
+        run: |
+          echo "开始构建，预计 60–120 分钟..."
+          sudo ./build.sh
+
+      - name: Prepare release name
+        id: meta
+        run: |
+          ISO="$(find . -maxdepth 1 -name '*.iso' -type f | head -n1)"
+          if [[ -z "$ISO" ]]; then
+            echo "未找到 ISO 文件"
+            exit 1
+          fi
+          VERSION="${GITHUB_REF_NAME:-dev}"
+          if [[ "$VERSION" == "dev" && "${{ github.ref_type }}" == "tag" ]]; then
+            VERSION="${{ github.ref_name }}"
+          fi
+          SAFE="ayuchan-linux-${VERSION}-amd64.iso"
+          cp "$ISO" "$SAFE"
+          sha256sum "$SAFE" | tee "${SAFE}.sha256"
+          echo "iso=$SAFE" >> "$GITHUB_OUTPUT"
+          echo "sha256=${SAFE}.sha256" >> "$GITHUB_OUTPUT"
+          ls -lh "$SAFE" "${SAFE}.sha256"
+
+      - name: Upload ISO artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ayuchan-linux-iso
+          path: |
+            ${{ steps.meta.outputs.iso }}
+            ${{ steps.meta.outputs.sha256 }}
+          retention-days: 14
+          if-no-files-found: error
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ${{ steps.meta.outputs.iso }}
+            ${{ steps.meta.outputs.sha256 }}
+          generate_release_notes: true
+          draft: false
+          prerelease: ${{ contains(github.ref_name, '-') }}
+
+      - name: Upload build log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: build.log
+          retention-days: 7
