@@ -54,9 +54,11 @@ jobs:
           sudo ./setup-build-host.sh
 
       - name: Build ISO
+        env:
+          LB_MODE: debian
         run: |
           echo "开始构建，预计 60–120 分钟..."
-          sudo ./build.sh
+          sudo -E ./build.sh
 
       - name: Prepare release name
         id: meta
