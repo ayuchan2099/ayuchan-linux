@@ -1,5 +1,12 @@
 # Ayuchan Linux — KDE 桌面与基础工具
 
+# Live 系统（从 U 盘启动必需）
+live-boot
+live-boot-initramfs-tools
+live-config
+live-config-systemd
+live-tools
+
 # KDE Plasma
 kde-plasma-desktop
 sddm

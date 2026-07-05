@@ -14,5 +14,5 @@ lb config noauto \
   --iso-preparer "ayuchan" \
   --iso-publisher "ayuchan" \
   --win32-loader false \
-  --bootappend-live "boot=live components quiet splash" \
+  --bootappend-live "boot=live components quiet splash live-media=removable" \
   --archive-areas "main contrib non-free non-free-firmware"
