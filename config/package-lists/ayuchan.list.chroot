@@ -55,12 +55,8 @@ plymouth-label
 libu2f-udev
 libvulkan1
 
-# 笔记本显卡固件与 Xorg 驱动
-firmware-misc-nonfree
-firmware-intel-graphics
-intel-microcode
+# Xorg 驱动（固件包在 1060 hook 中安装，避免 non-free 源时序问题）
 xserver-xorg-video-intel
 xserver-xorg-video-vesa
 xserver-xorg-video-fbdev
 mesa-utils
-intel-media-va-driver

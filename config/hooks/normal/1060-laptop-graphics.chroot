@@ -2,6 +2,17 @@
 # ThinkPad / Intel 核显：关闭 PSR/FBC，避免黑屏有鼠标无桌面
 set -e
 
+# 固件与微码（必须在 hook 阶段安装，此时 non-free 源已就绪）
+if [[ -f /etc/apt/sources.list ]]; then
+  sed -i 's/ main$/ main contrib non-free non-free-firmware/' /etc/apt/sources.list
+fi
+apt-get update
+apt-get install -y --no-install-recommends \
+  firmware-misc-nonfree \
+  intel-microcode \
+  intel-media-va-driver \
+  || true
+
 install -d /etc/modprobe.d
 cat > /etc/modprobe.d/i915-thinkpad.conf << 'EOF'
 # ThinkPad Intel 核显常见黑屏修复
