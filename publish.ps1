@@ -47,9 +47,16 @@ if ($LASTEXITCODE -eq 0) { $loggedIn = $true }
 if (-not $loggedIn) {
     Write-Host "Not logged in. Complete auth in the browser when prompted..."
     gh auth login --hostname github.com --git-protocol https --web
+    cmd /c "gh auth status >nul 2>nul"
+    if ($LASTEXITCODE -ne 0) {
+        throw "GitHub login failed. Run: gh auth login"
+    }
 }
 
 $owner = gh api user --jq .login
+if (-not $owner) {
+    throw "Could not read GitHub username. Check network and run: gh auth login"
+}
 Write-Host "==> GitHub user: $owner"
 
 if (-not (Test-Path ".git")) {
