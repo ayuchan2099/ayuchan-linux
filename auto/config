@@ -20,9 +20,6 @@ lb config noauto \
   --mirror-binary http://deb.debian.org/debian/ \
   --mirror-debian-installer http://deb.debian.org/debian/ \
   --mirror-chroot-security http://security.debian.org/debian-security/ \
-  --mirror-chroot-updates http://deb.debian.org/debian/ \
   --mirror-binary-security http://security.debian.org/debian-security/ \
-  --mirror-binary-updates http://deb.debian.org/debian/ \
   --parent-mirror-chroot-security http://security.debian.org/debian-security/ \
-  --parent-mirror-chroot-updates http://deb.debian.org/debian/ \
   --archive-areas "main contrib non-free non-free-firmware"
