@@ -26,15 +26,10 @@ sed -i 's/# zh_CN.UTF-8 UTF-8/zh_CN.UTF-8 UTF-8/' /etc/locale.gen
 locale-gen
 update-locale LANG=zh_CN.UTF-8
 
-# SDDM 自动登录（仅 Live 环境）
+# SDDM：笔记本上自动登录容易导致显卡未就绪时黑屏，改为手动登录
 mkdir -p /etc/sddm.conf.d
-cat > /etc/sddm.conf.d/autologin.conf << 'EOF'
-[Autologin]
-User=ayuchan
-Session=plasma
-
+cat > /etc/sddm.conf.d/ayuchan-live.conf << 'EOF'
 [General]
 DisplayServer=x11
-GreeterEnvironment=QT_IM_MODULE=fcitx
+GreeterEnvironment=QT_IM_MODULE=fcitx,QML_DISABLE_DISK_CACHE=1
 EOF
-# SDDM / KDE 主题由 1050-visual-theme.chroot 统一配置

@@ -1,0 +1,41 @@
+#!/bin/bash
+# 笔记本常见黑屏（有鼠标无桌面）：默认关闭 KWin 合成器，优先 modesetting 驱动
+set -e
+
+mkdir -p /etc/skel/.config
+cat > /etc/skel/.config/kwinrc << 'EOF'
+[Compositing]
+Enabled=false
+Backend=XRender
+OpenGLIsSafe=false
+LinuxDrm=false
+EOF
+
+mkdir -p /etc/X11/xorg.conf.d
+cat > /etc/X11/xorg.conf.d/10-ayuchan-laptop.conf << 'EOF'
+Section "Device"
+    Identifier "AllDevices"
+    Driver "modesetting"
+    Option "AccelMethod" "glamor"
+EndSection
+EOF
+
+mkdir -p /etc/skel/.config/plasma-workspace/env
+cat > /etc/skel/.config/plasma-workspace/env/01-ayuchan-graphics.sh << 'EOF'
+#!/bin/sh
+export QT_XCB_GL_INTEGRATION=none
+export KWIN_COMPOSE=O2
+EOF
+chmod +x /etc/skel/.config/plasma-workspace/env/01-ayuchan-graphics.sh
+
+apply_laptop_fix() {
+  local user="$1"
+  local home="/home/$user"
+  [[ -d "$home" ]] || return 0
+  install -d "$home/.config/plasma-workspace/env"
+  cp -a /etc/skel/.config/kwinrc "$home/.config/" 2>/dev/null || true
+  cp -a /etc/skel/.config/plasma-workspace/env/01-ayuchan-graphics.sh "$home/.config/plasma-workspace/env/" 2>/dev/null || true
+  chown -R "$user:$user" "$home/.config" 2>/dev/null || true
+}
+
+apply_laptop_fix ayuchan
