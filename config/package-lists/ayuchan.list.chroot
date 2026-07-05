@@ -55,14 +55,12 @@ plymouth-label
 libu2f-udev
 libvulkan1
 
-# 笔记本显卡固件与 Xorg 驱动（改善 Intel/AMD/NVIDIA 黑屏）
+# 笔记本显卡固件与 Xorg 驱动
 firmware-misc-nonfree
 firmware-intel-graphics
-firmware-amd-graphics
-firmware-nvidia-graphics
+intel-microcode
 xserver-xorg-video-intel
-xserver-xorg-video-amdgpu
-xserver-xorg-video-nouveau
 xserver-xorg-video-vesa
 xserver-xorg-video-fbdev
 mesa-utils
+intel-media-va-driver

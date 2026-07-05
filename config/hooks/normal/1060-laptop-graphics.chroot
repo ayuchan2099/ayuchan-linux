@@ -1,6 +1,12 @@
 #!/bin/bash
-# 笔记本常见黑屏（有鼠标无桌面）：默认关闭 KWin 合成器，优先 modesetting 驱动
+# ThinkPad / Intel 核显：关闭 PSR/FBC，避免黑屏有鼠标无桌面
 set -e
+
+install -d /etc/modprobe.d
+cat > /etc/modprobe.d/i915-thinkpad.conf << 'EOF'
+# ThinkPad Intel 核显常见黑屏修复
+options i915 enable_psr=0 enable_fbc=0
+EOF
 
 mkdir -p /etc/skel/.config
 cat > /etc/skel/.config/kwinrc << 'EOF'
@@ -12,11 +18,16 @@ LinuxDrm=false
 EOF
 
 mkdir -p /etc/X11/xorg.conf.d
-cat > /etc/X11/xorg.conf.d/10-ayuchan-laptop.conf << 'EOF'
+cat > /etc/X11/xorg.conf.d/10-ayuchan-intel.conf << 'EOF'
 Section "Device"
-    Identifier "AllDevices"
+    Identifier "IntelGraphics"
     Driver "modesetting"
     Option "AccelMethod" "glamor"
+    Option "DRI" "3"
+EndSection
+
+Section "ServerFlags"
+    Option "AutoAddGPU" "false"
 EndSection
 EOF
 
@@ -39,3 +50,8 @@ apply_laptop_fix() {
 }
 
 apply_laptop_fix ayuchan
+
+# 确保 initramfs 包含 i915 与 microcode
+if command -v update-initramfs >/dev/null 2>&1; then
+  update-initramfs -u -k all || true
+fi
