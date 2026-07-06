@@ -13,7 +13,8 @@ lb config noauto \
   --iso-application "Ayuchan Linux Live" \
   --iso-preparer "ayuchan" \
   --iso-publisher "ayuchan" \
+  --iso-volume "AYUCHAN" \
   --win32-loader false \
-  --bootappend-live "boot=live components live-media=removable nomodeset i915.enable_psr=0 i915.enable_fbc=0 nvidia.modeset=0 nosplash loglevel=3" \
-  --bootappend-live-failsafe "boot=live components live-media=removable nomodeset i915.enable_psr=0 nvidia.modeset=0 libata.noapm=1 nosplash single" \
+  --bootappend-live "boot=live components nomodeset i915.enable_psr=0 i915.enable_fbc=0 nvidia.modeset=0 live-delay=5 live-media-timeout=30 nosplash" \
+  --bootappend-live-failsafe "boot=live components nomodeset i915.enable_psr=0 nvidia.modeset=0 live-delay=10 live-media-timeout=60 debug nosplash" \
   --archive-areas "main contrib non-free non-free-firmware"

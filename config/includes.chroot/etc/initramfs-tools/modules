@@ -1,0 +1,12 @@
+# USB / 存储驱动，确保 initramfs 能挂载 Live 系统
+usb_storage
+uas
+sd_mod
+sr_mod
+ahci
+nvme
+xhci_pci
+ehci_pci
+uhci_hcd
+i915
+crc32c-intel

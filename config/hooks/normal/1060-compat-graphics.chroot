@@ -31,5 +31,10 @@ if command -v update-rc.d >/dev/null 2>&1; then
 fi
 
 if command -v update-initramfs >/dev/null 2>&1; then
+  mkdir -p /etc/initramfs-tools/conf.d
+  cat > /etc/initramfs-tools/conf.d/ayuchan-live.conf << 'EOF'
+MODULES=most
+COMPRESS=xz
+EOF
   update-initramfs -u -k all || true
 fi
