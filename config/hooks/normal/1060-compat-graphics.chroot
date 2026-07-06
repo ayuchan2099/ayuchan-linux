@@ -8,6 +8,7 @@ fi
 apt-get update
 apt-get install -y --no-install-recommends \
   firmware-misc-nonfree \
+  firmware-intel-graphics \
   intel-microcode \
   amd64-microcode \
   || true

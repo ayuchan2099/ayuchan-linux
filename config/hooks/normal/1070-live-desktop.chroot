@@ -1,13 +1,11 @@
 #!/bin/bash
-# Live 桌面：TTY 自动登录 + startx（不依赖 LightDM，兼容性更好）
+# Live 桌面：TTY 自动登录 + 多驱动 startx（不依赖 LightDM）
 set -e
 
-# Live 环境不用 LightDM（笔记本上易黑屏），安装到硬盘后由 Calamares 再启用
 systemctl disable lightdm.service 2>/dev/null || true
 systemctl mask lightdm.service 2>/dev/null || true
 systemctl set-default multi-user.target
 
-# tty1 自动登录 ayuchan
 mkdir -p /etc/systemd/system/getty@tty1.service.d
 cat > /etc/systemd/system/getty@tty1.service.d/ayuchan-autologin.conf << 'EOF'
 [Service]
@@ -17,10 +15,66 @@ EOF
 
 install -d /usr/local/bin
 
+cat > /usr/local/bin/ayuchan-startx << 'EOF'
+#!/bin/bash
+# 依次尝试 X 驱动，避免 fatal server error
+LOGDIR="${HOME}/.local/share/ayuchan"
+mkdir -p "$LOGDIR"
+CONF_D="/etc/X11/xorg.conf.d"
+ACTIVE="$CONF_D/90-ayuchan-active.conf"
+SHARE="/usr/share/ayuchan/xorg"
+
+apply_driver() {
+  rm -f "$ACTIVE"
+  if [ "$1" != "auto" ] && [ -f "$SHARE/$1.conf" ]; then
+    ln -sf "$SHARE/$1.conf" "$ACTIVE"
+  fi
+}
+
+probe_driver() {
+  local driver="$1"
+  local log="$LOGDIR/probe-${driver}.log"
+  apply_driver "$driver"
+  rm -f /tmp/.X0-lock /tmp/.X11-unix/X0 2>/dev/null || true
+  X :99 -nolisten tcp -logfile "$log" vt12 2>/dev/null &
+  local xpid=$!
+  sleep 2
+  if DISPLAY=:99 xdpyinfo >/dev/null 2>&1; then
+    kill "$xpid" 2>/dev/null || true
+    wait "$xpid" 2>/dev/null || true
+    rm -f /tmp/.X99-lock /tmp/.X11-unix/X99 2>/dev/null || true
+    echo "$driver"
+    return 0
+  fi
+  kill "$xpid" 2>/dev/null || true
+  wait "$xpid" 2>/dev/null || true
+  rm -f /tmp/.X99-lock /tmp/.X11-unix/X99 2>/dev/null || true
+  [ -f "$log" ] && tail -3 "$log" >&2
+  return 1
+}
+
+CHOSEN="auto"
+for driver in auto modesetting intel fbdev vesa; do
+  echo "检测 X 驱动: $driver ..."
+  if probe_driver "$driver"; then
+    CHOSEN="$driver"
+    break
+  fi
+done
+
+apply_driver "$CHOSEN"
+echo "启动 X（驱动: $CHOSEN）..."
+exec startx -- /usr/bin/X -nolisten tcp vt1 -logfile "$LOGDIR/Xorg.log"
+EOF
+chmod +x /usr/local/bin/ayuchan-startx
+
 cat > /usr/local/bin/ayuchan-start-desktop << 'EOF'
 #!/bin/bash
 echo "正在启动 XFCE 桌面..."
-export DISPLAY=:0
+if ! xdpyinfo >/dev/null 2>&1; then
+  exec ayuchan-startx
+fi
+export DISPLAY="${DISPLAY:-:0}"
 export XDG_RUNTIME_DIR="/run/user/$(id -u)"
 mkdir -p "$XDG_RUNTIME_DIR"
 chmod 700 "$XDG_RUNTIME_DIR"
@@ -29,9 +83,6 @@ if [ -z "$DBUS_SESSION_BUS_ADDRESS" ]; then
   eval "$(dbus-launch --sh-syntax --exit-with-session)"
 fi
 fcitx5 -d 2>/dev/null || true
-if [ -z "$DISPLAY" ] || ! xdpyinfo >/dev/null 2>&1; then
-  exec startx -- /usr/bin/X -nolisten tcp vt1
-fi
 exec startxfce4
 EOF
 chmod +x /usr/local/bin/ayuchan-start-desktop
@@ -51,12 +102,11 @@ EOF
 chmod +x /etc/skel/.xinitrc
 
 cat > /etc/skel/.bash_profile << 'EOF'
-# tty1 自动启动图形桌面
 case $(tty) in
   /dev/tty1)
-    if [ -z "$DISPLAY" ] && [ -x /usr/bin/startx ]; then
+    if [ -z "$DISPLAY" ] && [ -x /usr/local/bin/ayuchan-startx ]; then
       if [ ! -e /tmp/.X0-lock ]; then
-        exec startx -- -nolisten tcp vt1
+        exec ayuchan-startx
       fi
     fi
     ;;
@@ -83,9 +133,8 @@ cat > /etc/motd << 'EOF'
   Ayuchan Linux Live
   用户: ayuchan  密码: ayuchan
 
-  黑屏时按 Ctrl+Alt+F2 登录后执行:
-    ayuchan-start-desktop
-    calamares
+  X 启动失败时 Ctrl+Alt+F2 登录后执行:
+    ayuchan-startx
     debian-installer-launcher
 
 EOF

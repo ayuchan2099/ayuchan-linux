@@ -52,12 +52,15 @@ calamares
 calamares-settings-debian
 debian-installer-launcher
 
-# 通用 Xorg 驱动
+# Xorg 驱动（自动检测 + 回退）
 xserver-xorg
+xserver-xorg-video-modesetting
+xserver-xorg-video-intel
 xserver-xorg-video-fbdev
 xserver-xorg-video-vesa
 xserver-xorg-input-all
 xinit
+mesa-utils
 
 # 常用依赖（Chrome / VS Code 由 hook 安装）
 libu2f-udev
