@@ -52,7 +52,7 @@ calamares
 calamares-settings-debian
 debian-installer-launcher
 cpio
-polkit
+polkitd
 pkexec
 
 # Xorg（Debian 全驱动包，自动检测显卡）
