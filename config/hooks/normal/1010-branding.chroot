@@ -5,31 +5,41 @@ echo "ayuchan" > /etc/hostname
 
 cat > /etc/os-release << 'EOF'
 NAME="Ayuchan Linux"
-VERSION="1.0"
+VERSION="1.1"
 ID=ayuchan
 ID_LIKE=debian
-PRETTY_NAME="Ayuchan Linux 1.0"
+PRETTY_NAME="Ayuchan Linux 1.1"
 VERSION_CODENAME=bookworm
 HOME_URL="https://github.com/ayuchan/ayuchan-linux"
 SUPPORT_URL="https://github.com/ayuchan/ayuchan-linux/issues"
 BUG_REPORT_URL="https://github.com/ayuchan/ayuchan-linux/issues"
 EOF
 
-# Live 会话默认用户
 if ! id ayuchan >/dev/null 2>&1; then
-  useradd -m -s /bin/bash -G sudo,audio,video,plugdev,netdev ayuchan
+  useradd -m -s /bin/bash -G sudo,audio,video,plugdev,netdev,lpadmin ayuchan
   echo "ayuchan:ayuchan" | chpasswd
 fi
 
-# 中文 locale
 sed -i 's/# zh_CN.UTF-8 UTF-8/zh_CN.UTF-8 UTF-8/' /etc/locale.gen
 locale-gen
 update-locale LANG=zh_CN.UTF-8
 
-# SDDM：笔记本上自动登录容易导致显卡未就绪时黑屏，改为手动登录
-mkdir -p /etc/sddm.conf.d
-cat > /etc/sddm.conf.d/ayuchan-live.conf << 'EOF'
-[General]
-DisplayServer=x11
-GreeterEnvironment=QT_IM_MODULE=fcitx,QML_DISABLE_DISK_CACHE=1
+# LightDM + XFCE（比 SDDM+KDE 兼容性更好）
+mkdir -p /etc/lightdm/lightdm.conf.d
+cat > /etc/lightdm/lightdm.conf.d/50-ayuchan.conf << 'EOF'
+[Seat:*]
+greeter-session=lightdm-gtk-greeter
+user-session=xfce
+autologin-user=
+autologin-user-timeout=0
+xserver-command=X -br
+EOF
+
+cat > /etc/lightdm/lightdm-gtk-greeter.conf << 'EOF'
+[greeter]
+background=/usr/share/wallpapers/Ayuchan/contents/images/ayuchan.svg
+theme-name=Adwaita-dark
+icon-theme-name=Adwaita
+font-name=Noto Sans CJK SC 11
+show-indicators=~language;~session;~a11y;~power
 EOF

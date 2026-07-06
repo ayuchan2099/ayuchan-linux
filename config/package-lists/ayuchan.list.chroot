@@ -1,21 +1,25 @@
-# Ayuchan Linux — KDE 桌面与基础工具
+# Ayuchan Linux — 高兼容 XFCE 桌面（台式机 / 笔记本通用）
 
-# Live 系统（从 U 盘启动必需）
+# Live 系统
 live-boot
 live-boot-initramfs-tools
 live-config
 live-config-systemd
 live-tools
 
-# KDE Plasma
-kde-plasma-desktop
-sddm
-plasma-nm
-plasma-firewall
-plasma-systemmonitor
-dolphin
-konsole
-ark
+# XFCE 桌面（兼容性优于 KDE）
+xfce4
+xfce4-goodies
+xfce4-terminal
+lightdm
+lightdm-gtk-greeter
+network-manager-gnome
+thunar
+mousepad
+firefox-esr
+pavucontrol
+file-roller
+evince
 
 # 网络与基础
 sudo
@@ -27,6 +31,7 @@ vim
 bash-completion
 ca-certificates
 gnupg
+dbus-x11
 
 # 中文支持与字体
 fonts-noto-cjk
@@ -40,23 +45,16 @@ fcitx5-chinese-addons
 fcitx5-config-qt
 fcitx5-frontend-gtk3
 fcitx5-frontend-qt6
-fcitx5-material-color
 
 # 安装器
 calamares
 calamares-settings-debian
 
-# Plymouth 开机动画
-plymouth
-plymouth-themes
-plymouth-label
+# 全平台 Xorg 驱动（main 源，install pass 可安装）
+xserver-xorg
+xserver-xorg-video-all
+xserver-xorg-input-all
+mesa-utils
 
 # 常用依赖（Chrome / VS Code 由 hook 安装）
 libu2f-udev
-libvulkan1
-
-# Xorg 驱动（固件包在 1060 hook 中安装，避免 non-free 源时序问题）
-xserver-xorg-video-intel
-xserver-xorg-video-vesa
-xserver-xorg-video-fbdev
-mesa-utils
