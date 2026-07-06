@@ -1,29 +1,22 @@
 #!/bin/bash
-# Ayuchan 主题：XFCE 壁纸 + LightDM 登录界面（不启用 Plymouth，减少黑屏）
+# XFCE 纯色背景（不用 SVG，避免部分机器渲染失败）
 set -e
 
-WALLPAPER="/usr/share/wallpapers/Ayuchan/contents/images/ayuchan.svg"
-
-mkdir -p /etc/xdg/xfce4
-cat > /etc/xdg/xfce4/xinitrc << 'EOF'
-#!/bin/sh
-if test -r /etc/profile; then . /etc/profile; fi
-if test -r ~/.profile; then . ~/.profile; fi
-/usr/bin/fcitx5 -d 2>/dev/null || true
-exec startxfce4
-EOF
-chmod +x /etc/xdg/xfce4/xinitrc
-
 mkdir -p /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml
-cat > /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml << EOF
+cat > /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml << 'EOF'
 <?xml version="1.0" encoding="UTF-8"?>
 <channel name="xfce4-desktop" version="1.0">
   <property name="backdrop" type="empty">
     <property name="screen0" type="empty">
       <property name="monitor0" type="empty">
-        <property name="image-path" type="string" value="${WALLPAPER}"/>
-        <property name="image-style" type="int" value="5"/>
-        <property name="last-image" type="string" value="${WALLPAPER}"/>
+        <property name="color-style" type="int" value="0"/>
+        <property name="image-style" type="int" value="0"/>
+        <property name="rgba1" type="array">
+          <property name="alpha" type="double" value="1"/>
+          <property name="red" type="double" value="0.102"/>
+          <property name="green" type="double" value="0.153"/>
+          <property name="blue" type="double" value="0.267"/>
+        </property>
       </property>
     </property>
   </property>

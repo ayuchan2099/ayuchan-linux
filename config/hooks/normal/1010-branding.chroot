@@ -24,22 +24,4 @@ sed -i 's/# zh_CN.UTF-8 UTF-8/zh_CN.UTF-8 UTF-8/' /etc/locale.gen
 locale-gen
 update-locale LANG=zh_CN.UTF-8
 
-# LightDM + XFCE（比 SDDM+KDE 兼容性更好）
-mkdir -p /etc/lightdm/lightdm.conf.d
-cat > /etc/lightdm/lightdm.conf.d/50-ayuchan.conf << 'EOF'
-[Seat:*]
-greeter-session=lightdm-gtk-greeter
-user-session=xfce
-autologin-user=
-autologin-user-timeout=0
-xserver-command=X -br
-EOF
-
-cat > /etc/lightdm/lightdm-gtk-greeter.conf << 'EOF'
-[greeter]
-background=/usr/share/wallpapers/Ayuchan/contents/images/ayuchan.svg
-theme-name=Adwaita-dark
-icon-theme-name=Adwaita
-font-name=Noto Sans CJK SC 11
-show-indicators=~language;~session;~a11y;~power
-EOF
+# Live 环境不用 LightDM（部分笔记本会黑屏），改由 1070 hook 配置 TTY 自动登录 + XFCE
