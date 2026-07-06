@@ -47,10 +47,13 @@ fcitx5-config-qt
 fcitx5-frontend-gtk3
 fcitx5-frontend-qt6
 
-# 安装器
+# 安装器依赖
 calamares
 calamares-settings-debian
 debian-installer-launcher
+cpio
+polkit
+pkexec
 
 # Xorg（Debian 全驱动包，自动检测显卡）
 xserver-xorg

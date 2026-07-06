@@ -1,29 +1,3 @@
 #!/bin/bash
-# 安装器桌面入口（文本 + 图形）
-set -e
-
-install -d /usr/share/applications
-
-cat > /usr/share/applications/debian-installer-launcher.desktop << 'EOF'
-[Desktop Entry]
-Type=Application
-Name=Text Install Ayuchan Linux
-Name[zh_CN]=文本安装 Ayuchan Linux
-Comment=Debian text installer (works without graphics)
-Comment[zh_CN]=命令行安装器（黑屏时可用）
-Icon=debian-installer
-Exec=debian-installer-launcher
-Terminal=false
-Categories=System;
-EOF
-
-for desk in /etc/skel/Desktop /home/ayuchan/Desktop; do
-  install -d "$desk"
-  cp /usr/share/applications/debian-installer-launcher.desktop \
-    "$desk/Text Install Ayuchan Linux.desktop"
-  chmod +x "$desk/Text Install Ayuchan Linux.desktop"
-done
-
-if id ayuchan >/dev/null 2>&1; then
-  chown -R ayuchan:ayuchan /home/ayuchan/Desktop 2>/dev/null || true
-fi
+# 1080 已合并到 1040-install-launchers，保留空 hook 避免编号断层
+exit 0

@@ -1,41 +1,98 @@
 #!/bin/bash
-# 安装器桌面入口与权限
+# 安装器：启动脚本、sudo 免密、polkit、桌面快捷方式
 set -e
 
-install -d /usr/share/applications
+install -d /usr/local/bin /etc/sudoers.d /etc/polkit-1/rules.d
 
-cat > /usr/share/applications/calamares.desktop << 'EOF'
-[Desktop Entry]
-Type=Application
-Name=Install Ayuchan Linux
-Name[zh_CN]=安装 Ayuchan Linux
-Comment=Install Ayuchan Linux to your hard drive
-Comment[zh_CN]=将 Ayuchan Linux 安装到硬盘
-Icon=calamares
-Exec=pkexec calamares
-Terminal=false
-Categories=System;
-Keywords=install;calamares;ayuchan;
+cat > /usr/local/bin/ayuchan-install-gui << 'EOF'
+#!/bin/bash
+export DISPLAY="${DISPLAY:-:0}"
+export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+mkdir -p "$XDG_RUNTIME_DIR"
+if ! xdpyinfo >/dev/null 2>&1; then
+  xfce4-terminal -T "Ayuchan Install" -e "echo '无图形界面，请用文本安装'; read"
+  exit 1
+fi
+exec sudo /usr/bin/calamares
 EOF
+chmod +x /usr/local/bin/ayuchan-install-gui
 
-install -d /etc/polkit-1/rules.d
-cat > /etc/polkit-1/rules.d/49-nopasswd-calamares.rules << 'EOF'
+cat > /usr/local/bin/ayuchan-install-text << 'EOF'
+#!/bin/bash
+export DISPLAY="${DISPLAY:-:0}"
+# 文本/图形 Debian 安装器（从 Live 介质启动 d-i）
+exec sudo /usr/bin/debian-installer-launcher
+EOF
+chmod +x /usr/local/bin/ayuchan-install-text
+
+cat > /etc/sudoers.d/ayuchan-install << 'EOF'
+Defaults:ayuchan !requiretty
+ayuchan ALL=(ALL) NOPASSWD: /usr/bin/calamares, /usr/sbin/calamares, /usr/bin/debian-installer-launcher, /usr/sbin/debian-installer-launcher
+EOF
+chmod 440 /etc/sudoers.d/ayuchan-install
+
+cat > /etc/polkit-1/rules.d/49-ayuchan-install.rules << 'EOF'
 polkit.addRule(function(action, subject) {
-    if (action.id.indexOf("org.freedesktop.policykit.exec") == 0 &&
-        subject.isInGroup("sudo") &&
-        action.lookup("program") == "/usr/bin/calamares") {
-        return polkit.Result.YES;
+    if (subject.user == "ayuchan" && subject.local && subject.active) {
+        if (action.id.indexOf("org.freedesktop.policykit.exec") == 0) {
+            return polkit.Result.YES;
+        }
     }
 });
 EOF
 
-# 桌面快捷方式（Live 用户）
+install -d /usr/share/applications
+
+cat > /usr/share/applications/ayuchan-install-gui.desktop << 'EOF'
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Install Ayuchan Linux
+Name[zh_CN]=安装 Ayuchan Linux
+Comment=Graphical installer (Calamares)
+Comment[zh_CN]=图形安装器 Calamares
+Icon=calamares
+Exec=/usr/local/bin/ayuchan-install-gui
+Terminal=false
+Categories=System;
+StartupNotify=true
+EOF
+
+cat > /usr/share/applications/ayuchan-install-text.desktop << 'EOF'
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Text Install Ayuchan Linux
+Name[zh_CN]=文本安装 Ayuchan Linux
+Comment=Debian text installer
+Comment[zh_CN]=Debian 文本安装器
+Icon=debian-installer
+Exec=/usr/local/bin/ayuchan-install-text
+Terminal=false
+Categories=System;
+StartupNotify=true
+EOF
+
 for desk in /etc/skel/Desktop /home/ayuchan/Desktop; do
   install -d "$desk"
-  cp /usr/share/applications/calamares.desktop "$desk/Install Ayuchan Linux.desktop"
-  chmod +x "$desk/Install Ayuchan Linux.desktop"
+  cp /usr/share/applications/ayuchan-install-gui.desktop "$desk/Install Ayuchan Linux.desktop"
+  cp /usr/share/applications/ayuchan-install-text.desktop "$desk/Text Install Ayuchan Linux.desktop"
+  chmod +x "$desk/Install Ayuchan Linux.desktop" "$desk/Text Install Ayuchan Linux.desktop"
 done
 
 if id ayuchan >/dev/null 2>&1; then
   chown -R ayuchan:ayuchan /home/ayuchan/Desktop 2>/dev/null || true
 fi
+
+# 开机标记 XFCE 桌面快捷方式为可执行（否则双击无反应）
+install -d /etc/xdg/autostart
+cat > /etc/xdg/autostart/ayuchan-trust-desktop.desktop << 'EOF'
+[Desktop Entry]
+Type=Application
+Name=Trust Ayuchan Desktop Launchers
+Exec=sh -c 'sleep 3; for f in "$HOME/Desktop/"*.desktop; do [ -f "$f" ] && gio set "$f" metadata::trusted true 2>/dev/null; chmod +x "$f"; done'
+Hidden=true
+NoDisplay=true
+X-GNOME-Autostart-enabled=true
+OnlyShowIn=XFCE;
+EOF
