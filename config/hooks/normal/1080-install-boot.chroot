@@ -1,28 +1,15 @@
 #!/bin/bash
-# 安装入口：桌面快捷方式与 Calamares 启动脚本（不依赖 LightDM）
+# 安装器桌面入口（文本 + 图形）
 set -e
 
-cat > /usr/local/bin/ayuchan-launch-calamares << 'EOF'
-#!/bin/bash
-export DISPLAY="${DISPLAY:-:0}"
-export XDG_RUNTIME_DIR="/run/user/$(id -u)"
-mkdir -p "$XDG_RUNTIME_DIR"
-chmod 700 "$XDG_RUNTIME_DIR"
-if ! xdpyinfo >/dev/null 2>&1; then
-  echo "未检测到图形界面，请先执行: ayuchan-start-desktop"
-  exit 1
-fi
-exec calamares
-EOF
-chmod +x /usr/local/bin/ayuchan-launch-calamares
-
 install -d /usr/share/applications
+
 cat > /usr/share/applications/debian-installer-launcher.desktop << 'EOF'
 [Desktop Entry]
 Type=Application
 Name=Text Install Ayuchan Linux
 Name[zh_CN]=文本安装 Ayuchan Linux
-Comment=Debian text installer (no graphics required)
+Comment=Debian text installer (works without graphics)
 Comment[zh_CN]=命令行安装器（黑屏时可用）
 Icon=debian-installer
 Exec=debian-installer-launcher
@@ -40,18 +27,3 @@ done
 if id ayuchan >/dev/null 2>&1; then
   chown -R ayuchan:ayuchan /home/ayuchan/Desktop 2>/dev/null || true
 fi
-
-cat > /etc/motd << 'EOF'
-
-  Ayuchan Linux — 安装方式
-  ─────────────────────────────────────
-  启动菜单：
-    • 安装 Ayuchan Linux（图形安装器）→ 自动打开 Calamares
-    • 文本安装 Ayuchan Linux（命令行）→ 无需图形界面
-
-  黑屏救援：Ctrl+Alt+F2 登录 ayuchan/ayuchan
-    ayuchan-start-desktop
-    calamares
-    debian-installer-launcher
-
-EOF

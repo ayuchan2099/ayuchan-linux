@@ -1,5 +1,5 @@
 #!/bin/bash
-# 固件与微码；内核 nomodeset 由 GRUB 传入，不黑名单屏蔽显卡模块
+# Intel 核显固件 + 关闭 PSR/FBC + 彻底禁用 Plymouth（避免驱动加载后黑屏）
 set -e
 
 if [[ -f /etc/apt/sources.list ]]; then
@@ -13,11 +13,20 @@ apt-get install -y --no-install-recommends \
   amd64-microcode \
   || true
 
-rm -f /etc/modprobe.d/ayuchan-generic-graphics.conf
+apt-get remove -y --purge plymouth plymouth-themes 2>/dev/null || true
+
+install -d /etc/modprobe.d
+cat > /etc/modprobe.d/ayuchan-i915.conf << 'EOF'
+# ThinkPad Intel 核显：关闭 PSR/FBC，减少黑屏
+options i915 enable_psr=0 enable_fbc=0
+EOF
 
 if command -v update-rc.d >/dev/null 2>&1; then
   update-rc.d -f plymouth disable 2>/dev/null || true
 fi
+systemctl mask plymouth.service 2>/dev/null || true
+systemctl mask plymouth-quit.service 2>/dev/null || true
+systemctl mask plymouth-quit-wait.service 2>/dev/null || true
 
 if command -v update-initramfs >/dev/null 2>&1; then
   mkdir -p /etc/initramfs-tools/conf.d

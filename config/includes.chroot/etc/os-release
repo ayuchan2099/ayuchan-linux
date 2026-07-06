@@ -1,9 +1,9 @@
 NAME="Ayuchan Linux"
-VERSION="1.1"
+VERSION="1.3"
 ID=ayuchan
 ID_LIKE=debian
-PRETTY_NAME="Ayuchan Linux 1.1"
+PRETTY_NAME="Ayuchan Linux 1.3"
 VERSION_CODENAME=bookworm
-HOME_URL="https://github.com/ayuchan/ayuchan-linux"
-SUPPORT_URL="https://github.com/ayuchan/ayuchan-linux/issues"
-BUG_REPORT_URL="https://github.com/ayuchan/ayuchan-linux/issues"
+HOME_URL="https://github.com/ayuchan2099/ayuchan-linux"
+SUPPORT_URL="https://github.com/ayuchan2099/ayuchan-linux/issues"
+BUG_REPORT_URL="https://github.com/ayuchan2099/ayuchan-linux/issues"

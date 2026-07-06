@@ -1,18 +1,18 @@
 label live-@FLAVOUR@
-	menu label ^试用 Ayuchan Linux（Live 桌面）
+	menu label ^Live system (try Ayuchan Linux)
 	menu default
 	linux @LINUX@
 	initrd @INITRD@
 	append @APPEND_LIVE@
 
-label live-@FLAVOUR@-calamares
-	menu label ^安装 Ayuchan Linux（图形安装器 Calamares）
+label live-@FLAVOUR@-install
+	menu label ^Live install (start Calamares)
 	linux @LINUX@
 	initrd @INITRD@
 	append @APPEND_LIVE@ ayuchan-install=1
 
 label live-@FLAVOUR@-failsafe
-	menu label ^安全模式 Live（排障）
+	menu label ^Live (failsafe / nomodeset)
 	linux @LINUX@
 	initrd @INITRD@
 	append @APPEND_LIVE_FAILSAFE@

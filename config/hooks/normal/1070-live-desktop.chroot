@@ -1,140 +1,60 @@
 #!/bin/bash
-# Live 桌面：TTY 自动登录 + 多驱动 startx（不依赖 LightDM）
+# 标准 LightDM + XFCE 自动登录（与 live-config 一致，不屏蔽 LightDM）
 set -e
 
-systemctl disable lightdm.service 2>/dev/null || true
-systemctl mask lightdm.service 2>/dev/null || true
-systemctl set-default multi-user.target
+systemctl unmask lightdm.service 2>/dev/null || true
+systemctl enable lightdm.service
+systemctl set-default graphical.target
 
-mkdir -p /etc/systemd/system/getty@tty1.service.d
-cat > /etc/systemd/system/getty@tty1.service.d/ayuchan-autologin.conf << 'EOF'
-[Service]
-ExecStart=
-ExecStart=-/sbin/agetty --autologin ayuchan --noclear --keep-baud 115200,38400,9600 %I $TERM
+mkdir -p /etc/lightdm/lightdm.conf.d
+cat > /etc/lightdm/lightdm.conf.d/50-ayuchan.conf << 'EOF'
+[Seat:*]
+autologin-user=ayuchan
+autologin-user-timeout=0
+autologin-session=xfce
+user-session=xfce
+greeter-session=lightdm-gtk-greeter
+xserver-command=X -br -noreset
+EOF
+
+mkdir -p /etc/xdg/autostart
+cat > /etc/xdg/autostart/ayuchan-calamares.desktop << 'EOF'
+[Desktop Entry]
+Type=Application
+Name=Calamares Auto Install
+Exec=sh -c 'grep -qs ayuchan-install=1 /proc/cmdline && sleep 8 && calamares'
+Hidden=false
+NoDisplay=true
+X-GNOME-Autostart-enabled=true
+OnlyShowIn=XFCE;
 EOF
 
 install -d /usr/local/bin
 
-cat > /usr/local/bin/ayuchan-startx << 'EOF'
-#!/bin/bash
-# 依次尝试 X 驱动，避免 fatal server error
-LOGDIR="${HOME}/.local/share/ayuchan"
-mkdir -p "$LOGDIR"
-CONF_D="/etc/X11/xorg.conf.d"
-ACTIVE="$CONF_D/90-ayuchan-active.conf"
-SHARE="/usr/share/ayuchan/xorg"
-
-apply_driver() {
-  rm -f "$ACTIVE"
-  if [ "$1" != "auto" ] && [ -f "$SHARE/$1.conf" ]; then
-    ln -sf "$SHARE/$1.conf" "$ACTIVE"
-  fi
-}
-
-probe_driver() {
-  local driver="$1"
-  local log="$LOGDIR/probe-${driver}.log"
-  apply_driver "$driver"
-  rm -f /tmp/.X0-lock /tmp/.X11-unix/X0 2>/dev/null || true
-  X :99 -nolisten tcp -logfile "$log" vt12 2>/dev/null &
-  local xpid=$!
-  sleep 2
-  if DISPLAY=:99 xdpyinfo >/dev/null 2>&1; then
-    kill "$xpid" 2>/dev/null || true
-    wait "$xpid" 2>/dev/null || true
-    rm -f /tmp/.X99-lock /tmp/.X11-unix/X99 2>/dev/null || true
-    echo "$driver"
-    return 0
-  fi
-  kill "$xpid" 2>/dev/null || true
-  wait "$xpid" 2>/dev/null || true
-  rm -f /tmp/.X99-lock /tmp/.X11-unix/X99 2>/dev/null || true
-  [ -f "$log" ] && tail -3 "$log" >&2
-  return 1
-}
-
-CHOSEN="auto"
-for driver in auto modesetting intel fbdev vesa; do
-  echo "检测 X 驱动: $driver ..."
-  if probe_driver "$driver"; then
-    CHOSEN="$driver"
-    break
-  fi
-done
-
-apply_driver "$CHOSEN"
-echo "启动 X（驱动: $CHOSEN）..."
-exec startx -- /usr/bin/X -nolisten tcp vt1 -logfile "$LOGDIR/Xorg.log"
-EOF
-chmod +x /usr/local/bin/ayuchan-startx
-
 cat > /usr/local/bin/ayuchan-start-desktop << 'EOF'
 #!/bin/bash
-echo "正在启动 XFCE 桌面..."
-if ! xdpyinfo >/dev/null 2>&1; then
-  exec ayuchan-startx
-fi
-export DISPLAY="${DISPLAY:-:0}"
-export XDG_RUNTIME_DIR="/run/user/$(id -u)"
-mkdir -p "$XDG_RUNTIME_DIR"
-chmod 700 "$XDG_RUNTIME_DIR"
-export GTK_IM_MODULE=fcitx QT_IM_MODULE=fcitx XMODIFIERS=@im=fcitx
-if [ -z "$DBUS_SESSION_BUS_ADDRESS" ]; then
-  eval "$(dbus-launch --sh-syntax --exit-with-session)"
-fi
-fcitx5 -d 2>/dev/null || true
-exec startxfce4
+echo "重启图形界面..."
+sudo systemctl restart lightdm.service
 EOF
 chmod +x /usr/local/bin/ayuchan-start-desktop
 
-cat > /etc/skel/.xinitrc << 'EOF'
-#!/bin/sh
-export GTK_IM_MODULE=fcitx QT_IM_MODULE=fcitx XMODIFIERS=@im=fcitx
-if [ -z "$DBUS_SESSION_BUS_ADDRESS" ]; then
-  eval "$(dbus-launch --sh-syntax --exit-with-session)"
-fi
-fcitx5 -d 2>/dev/null || true
-if grep -qs 'ayuchan-install=1' /proc/cmdline; then
-  exec calamares
-fi
-exec startxfce4
+cat > /usr/local/bin/ayuchan-rescue << 'EOF'
+#!/bin/bash
+echo "Ayuchan Linux 救援命令:"
+echo "  ayuchan-start-desktop      重启 LightDM"
+echo "  calamares                  图形安装"
+echo "  debian-installer-launcher  文本安装"
+echo "  systemctl restart lightdm  重启显示管理器"
+echo "  journalctl -b -u lightdm    查看 LightDM 日志"
 EOF
-chmod +x /etc/skel/.xinitrc
-
-cat > /etc/skel/.bash_profile << 'EOF'
-case $(tty) in
-  /dev/tty1)
-    if [ -z "$DISPLAY" ] && [ -x /usr/local/bin/ayuchan-startx ]; then
-      if [ ! -e /tmp/.X0-lock ]; then
-        exec ayuchan-startx
-      fi
-    fi
-    ;;
-esac
-[ -f "$HOME/.bashrc" ] && . "$HOME/.bashrc"
-EOF
-
-cat > /etc/skel/.profile << 'EOF'
-if [ -n "$BASH_VERSION" ] && [ -f "$HOME/.bashrc" ]; then
-  . "$HOME/.bashrc"
-fi
-EOF
-
-if id ayuchan >/dev/null 2>&1; then
-  cp /etc/skel/.xinitrc /home/ayuchan/.xinitrc
-  cp /etc/skel/.bash_profile /home/ayuchan/.bash_profile
-  cp /etc/skel/.profile /home/ayuchan/.profile
-  chown ayuchan:ayuchan /home/ayuchan/.xinitrc /home/ayuchan/.bash_profile /home/ayuchan/.profile
-  chmod +x /home/ayuchan/.xinitrc
-fi
+chmod +x /usr/local/bin/ayuchan-rescue
 
 cat > /etc/motd << 'EOF'
 
-  Ayuchan Linux Live
+  Ayuchan Linux 1.3 Live
   用户: ayuchan  密码: ayuchan
 
-  X 启动失败时 Ctrl+Alt+F2 登录后执行:
-    ayuchan-startx
-    debian-installer-launcher
+  黑屏: Ctrl+Alt+F2 登录后执行 ayuchan-rescue
+  安装: 启动菜单选「文本安装」或桌面「Install Ayuchan Linux」
 
 EOF
