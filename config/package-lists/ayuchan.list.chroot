@@ -50,6 +50,7 @@ fcitx5-frontend-qt6
 # 安装器
 calamares
 calamares-settings-debian
+debian-installer-launcher
 
 # 通用 Xorg 驱动（不装 intel/amdgpu/nvidia 等厂商驱动包）
 xserver-xorg

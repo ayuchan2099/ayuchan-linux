@@ -1,0 +1,80 @@
+#!/bin/bash
+# GRUB「直接安装」：检测 ayuchan-install=1 后自动启动 Calamares
+set -e
+
+cat > /etc/systemd/system/ayuchan-calamares-install.service << 'EOF'
+[Unit]
+Description=Ayuchan Linux — auto-start Calamares installer
+After=graphical.target lightdm.service
+Wants=lightdm.service
+ConditionKernelCommandLine=ayuchan-install=1
+
+[Service]
+Type=oneshot
+User=ayuchan
+Environment=DISPLAY=:0
+Environment=XDG_RUNTIME_DIR=/run/user/1000
+ExecStartPre=/bin/sleep 10
+ExecStart=/usr/bin/calamares
+RemainAfterExit=yes
+
+[Install]
+WantedBy=graphical.target
+EOF
+
+systemctl enable ayuchan-calamares-install.service
+
+cat > /usr/local/bin/ayuchan-launch-calamares << 'EOF'
+#!/bin/bash
+export DISPLAY=:0
+export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+mkdir -p "$XDG_RUNTIME_DIR"
+chmod 700 "$XDG_RUNTIME_DIR"
+exec calamares
+EOF
+chmod +x /usr/local/bin/ayuchan-launch-calamares
+
+sed -i 's|ExecStart=/usr/bin/calamares|ExecStart=/usr/local/bin/ayuchan-launch-calamares|' \
+  /etc/systemd/system/ayuchan-calamares-install.service
+
+install -d /usr/share/applications
+cat > /usr/share/applications/debian-installer-launcher.desktop << 'EOF'
+[Desktop Entry]
+Type=Application
+Name=Text Install Ayuchan Linux
+Name[zh_CN]=文本安装 Ayuchan Linux
+Comment=Debian text installer (no graphics required)
+Comment[zh_CN]=命令行安装器（黑屏时可用）
+Icon=debian-installer
+Exec=debian-installer-launcher
+Terminal=false
+Categories=System;
+EOF
+
+for desk in /etc/skel/Desktop /home/ayuchan/Desktop; do
+  install -d "$desk"
+  cp /usr/share/applications/debian-installer-launcher.desktop \
+    "$desk/Text Install Ayuchan Linux.desktop"
+  chmod +x "$desk/Text Install Ayuchan Linux.desktop"
+done
+
+if id ayuchan >/dev/null 2>&1; then
+  chown -R ayuchan:ayuchan /home/ayuchan/Desktop 2>/dev/null || true
+fi
+
+cat > /etc/motd << 'EOF'
+
+  Ayuchan Linux — 安装方式
+  ─────────────────────────────────────
+  启动菜单：
+    • 安装 Ayuchan Linux（图形安装器）→ 自动打开 Calamares
+    • 文本安装 Ayuchan Linux（命令行）→ 无需图形界面
+
+  已进入桌面：
+    • 双击「安装 Ayuchan Linux」→ Calamares
+    • 双击「文本安装 Ayuchan Linux」→ 命令行安装器
+
+  黑屏救援：Ctrl+Alt+F2 登录 ayuchan/ayuchan
+    执行 calamares  或  debian-installer-launcher
+
+EOF

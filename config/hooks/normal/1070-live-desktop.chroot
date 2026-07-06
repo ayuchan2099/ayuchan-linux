@@ -51,7 +51,10 @@ cat > /etc/motd << 'EOF'
   用户: ayuchan  密码: ayuchan
 
   若黑屏请按 Ctrl+Alt+F2 登录后执行:
-    ayuchan-start-desktop
+    calamares
+    或 debian-installer-launcher
+
+  启动菜单可选「安装 Ayuchan Linux（图形安装器）」直接安装
 
 EOF
 
