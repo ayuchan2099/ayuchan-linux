@@ -16,7 +16,7 @@ BUG_REPORT_URL="https://github.com/ayuchan/ayuchan-linux/issues"
 EOF
 
 if ! id ayuchan >/dev/null 2>&1; then
-  useradd -m -s /bin/bash -G sudo,audio,video,plugdev,netdev,lpadmin ayuchan
+  useradd -m -s /bin/bash -G sudo,audio,video,plugdev,netdev ayuchan
   echo "ayuchan:ayuchan" | chpasswd
 fi
 
