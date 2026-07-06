@@ -1,5 +1,5 @@
 #!/bin/bash
-# 全平台兼容：通用固件 + 禁用厂商专用显卡驱动，使用 nomodeset + VESA/fbdev
+# 固件与微码；内核 nomodeset 由 GRUB 传入，不黑名单屏蔽显卡模块
 set -e
 
 if [[ -f /etc/apt/sources.list ]]; then
@@ -12,17 +12,7 @@ apt-get install -y --no-install-recommends \
   amd64-microcode \
   || true
 
-install -d /etc/modprobe.d
-cat > /etc/modprobe.d/ayuchan-generic-graphics.conf << 'EOF'
-# 不加载 Intel/AMD/NVIDIA 专用显卡驱动，交给内核通用帧缓冲 + Xorg VESA
-blacklist i915
-blacklist amdgpu
-blacklist radeon
-blacklist nouveau
-blacklist nvidia
-blacklist nvidia_drm
-blacklist nvidia_modeset
-EOF
+rm -f /etc/modprobe.d/ayuchan-generic-graphics.conf
 
 if command -v update-rc.d >/dev/null 2>&1; then
   update-rc.d -f plymouth disable 2>/dev/null || true

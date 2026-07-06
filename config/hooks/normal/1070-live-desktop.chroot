@@ -1,33 +1,22 @@
 #!/bin/bash
-# LightDM 自动登录 + XFCE（配合 live-config 与通用 VESA 驱动）
+# Live 桌面：TTY 自动登录 + startx（不依赖 LightDM，兼容性更好）
 set -e
 
-systemctl unmask lightdm.service 2>/dev/null || true
-systemctl enable lightdm.service
-systemctl set-default graphical.target
+# Live 环境不用 LightDM（笔记本上易黑屏），安装到硬盘后由 Calamares 再启用
+systemctl disable lightdm.service 2>/dev/null || true
+systemctl mask lightdm.service 2>/dev/null || true
+systemctl set-default multi-user.target
 
-mkdir -p /etc/lightdm/lightdm.conf.d
-cat > /etc/lightdm/lightdm.conf.d/50-ayuchan-autologin.conf << 'EOF'
-[Seat:*]
-autologin-user=ayuchan
-autologin-user-timeout=0
-autologin-session=xfce
-user-session=xfce
-greeter-session=lightdm-gtk-greeter
-xserver-command=X -br -noreset
+# tty1 自动登录 ayuchan
+mkdir -p /etc/systemd/system/getty@tty1.service.d
+cat > /etc/systemd/system/getty@tty1.service.d/ayuchan-autologin.conf << 'EOF'
+[Service]
+ExecStart=
+ExecStart=-/sbin/agetty --autologin ayuchan --noclear --keep-baud 115200,38400,9600 %I $TERM
 EOF
 
-cat > /etc/lightdm/lightdm-gtk-greeter.conf << 'EOF'
-[greeter]
-background=#1a2744
-theme-name=Adwaita-dark
-icon-theme-name=Adwaita
-font-name=Sans 11
-show-indicators=~language;~session;~a11y;~power
-EOF
-
-# 手动恢复桌面的救援脚本（黑屏时在 TTY 执行）
 install -d /usr/local/bin
+
 cat > /usr/local/bin/ayuchan-start-desktop << 'EOF'
 #!/bin/bash
 echo "正在启动 XFCE 桌面..."
@@ -36,36 +25,67 @@ export XDG_RUNTIME_DIR="/run/user/$(id -u)"
 mkdir -p "$XDG_RUNTIME_DIR"
 chmod 700 "$XDG_RUNTIME_DIR"
 export GTK_IM_MODULE=fcitx QT_IM_MODULE=fcitx XMODIFIERS=@im=fcitx
-systemctl stop lightdm 2>/dev/null || true
 if [ -z "$DBUS_SESSION_BUS_ADDRESS" ]; then
   eval "$(dbus-launch --sh-syntax --exit-with-session)"
 fi
 fcitx5 -d 2>/dev/null || true
+if [ -z "$DISPLAY" ] || ! xdpyinfo >/dev/null 2>&1; then
+  exec startx -- /usr/bin/X -nolisten tcp vt1
+fi
 exec startxfce4
 EOF
 chmod +x /usr/local/bin/ayuchan-start-desktop
 
-cat > /etc/motd << 'EOF'
+cat > /etc/skel/.xinitrc << 'EOF'
+#!/bin/sh
+export GTK_IM_MODULE=fcitx QT_IM_MODULE=fcitx XMODIFIERS=@im=fcitx
+if [ -z "$DBUS_SESSION_BUS_ADDRESS" ]; then
+  eval "$(dbus-launch --sh-syntax --exit-with-session)"
+fi
+fcitx5 -d 2>/dev/null || true
+if grep -qs 'ayuchan-install=1' /proc/cmdline; then
+  exec calamares
+fi
+exec startxfce4
+EOF
+chmod +x /etc/skel/.xinitrc
 
-  Ayuchan Linux Live
-  用户: ayuchan  密码: ayuchan
-
-  若黑屏请按 Ctrl+Alt+F2 登录后执行:
-    calamares
-    或 debian-installer-launcher
-
-  启动菜单可选「安装 Ayuchan Linux（图形安装器）」直接安装
-
+cat > /etc/skel/.bash_profile << 'EOF'
+# tty1 自动启动图形桌面
+case $(tty) in
+  /dev/tty1)
+    if [ -z "$DISPLAY" ] && [ -x /usr/bin/startx ]; then
+      if [ ! -e /tmp/.X0-lock ]; then
+        exec startx -- -nolisten tcp vt1
+      fi
+    fi
+    ;;
+esac
+[ -f "$HOME/.bashrc" ] && . "$HOME/.bashrc"
 EOF
 
-# 简单 .profile，不在 TTY 自动拉 X（交给 LightDM）
 cat > /etc/skel/.profile << 'EOF'
 if [ -n "$BASH_VERSION" ] && [ -f "$HOME/.bashrc" ]; then
   . "$HOME/.bashrc"
 fi
 EOF
 
-if [[ -d /home/ayuchan ]]; then
+if id ayuchan >/dev/null 2>&1; then
+  cp /etc/skel/.xinitrc /home/ayuchan/.xinitrc
+  cp /etc/skel/.bash_profile /home/ayuchan/.bash_profile
   cp /etc/skel/.profile /home/ayuchan/.profile
-  chown ayuchan:ayuchan /home/ayuchan/.profile
+  chown ayuchan:ayuchan /home/ayuchan/.xinitrc /home/ayuchan/.bash_profile /home/ayuchan/.profile
+  chmod +x /home/ayuchan/.xinitrc
 fi
+
+cat > /etc/motd << 'EOF'
+
+  Ayuchan Linux Live
+  用户: ayuchan  密码: ayuchan
+
+  黑屏时按 Ctrl+Alt+F2 登录后执行:
+    ayuchan-start-desktop
+    calamares
+    debian-installer-launcher
+
+EOF

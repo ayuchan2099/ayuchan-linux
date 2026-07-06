@@ -1,41 +1,20 @@
 #!/bin/bash
-# GRUB「直接安装」：检测 ayuchan-install=1 后自动启动 Calamares
+# 安装入口：桌面快捷方式与 Calamares 启动脚本（不依赖 LightDM）
 set -e
-
-cat > /etc/systemd/system/ayuchan-calamares-install.service << 'EOF'
-[Unit]
-Description=Ayuchan Linux — auto-start Calamares installer
-After=graphical.target lightdm.service
-Wants=lightdm.service
-ConditionKernelCommandLine=ayuchan-install=1
-
-[Service]
-Type=oneshot
-User=ayuchan
-Environment=DISPLAY=:0
-Environment=XDG_RUNTIME_DIR=/run/user/1000
-ExecStartPre=/bin/sleep 10
-ExecStart=/usr/bin/calamares
-RemainAfterExit=yes
-
-[Install]
-WantedBy=graphical.target
-EOF
-
-systemctl enable ayuchan-calamares-install.service
 
 cat > /usr/local/bin/ayuchan-launch-calamares << 'EOF'
 #!/bin/bash
-export DISPLAY=:0
+export DISPLAY="${DISPLAY:-:0}"
 export XDG_RUNTIME_DIR="/run/user/$(id -u)"
 mkdir -p "$XDG_RUNTIME_DIR"
 chmod 700 "$XDG_RUNTIME_DIR"
+if ! xdpyinfo >/dev/null 2>&1; then
+  echo "未检测到图形界面，请先执行: ayuchan-start-desktop"
+  exit 1
+fi
 exec calamares
 EOF
 chmod +x /usr/local/bin/ayuchan-launch-calamares
-
-sed -i 's|ExecStart=/usr/bin/calamares|ExecStart=/usr/local/bin/ayuchan-launch-calamares|' \
-  /etc/systemd/system/ayuchan-calamares-install.service
 
 install -d /usr/share/applications
 cat > /usr/share/applications/debian-installer-launcher.desktop << 'EOF'
@@ -70,11 +49,9 @@ cat > /etc/motd << 'EOF'
     • 安装 Ayuchan Linux（图形安装器）→ 自动打开 Calamares
     • 文本安装 Ayuchan Linux（命令行）→ 无需图形界面
 
-  已进入桌面：
-    • 双击「安装 Ayuchan Linux」→ Calamares
-    • 双击「文本安装 Ayuchan Linux」→ 命令行安装器
-
   黑屏救援：Ctrl+Alt+F2 登录 ayuchan/ayuchan
-    执行 calamares  或  debian-installer-launcher
+    ayuchan-start-desktop
+    calamares
+    debian-installer-launcher
 
 EOF

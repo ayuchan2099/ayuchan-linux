@@ -16,7 +16,7 @@ lb config noauto \
   --iso-publisher "ayuchan" \
   --iso-volume "AYUCHAN" \
   --win32-loader false \
-  --bootappend-live "boot=live components username=ayuchan nomodeset live-delay=5 nosplash" \
-  --bootappend-live-failsafe "boot=live components username=ayuchan nomodeset live-delay=10 debug nosplash" \
+  --bootappend-live "boot=live components username=ayuchan nomodeset vga=791 live-delay=5 nosplash" \
+  --bootappend-live-failsafe "boot=live components username=ayuchan nomodeset vga=791 live-delay=10 debug nosplash" \
   --bootappend-install "nomodeset live-delay=5" \
   --archive-areas "main contrib non-free non-free-firmware"
