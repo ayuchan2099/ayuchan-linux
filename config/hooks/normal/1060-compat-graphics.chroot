@@ -1,5 +1,5 @@
 #!/bin/bash
-# 全平台兼容：固件/微码 + 通用显卡内核参数（不强制 Xorg 配置，交给自动检测）
+# 全平台兼容：通用固件 + 禁用厂商专用显卡驱动，使用 nomodeset + VESA/fbdev
 set -e
 
 if [[ -f /etc/apt/sources.list ]]; then
@@ -10,19 +10,20 @@ apt-get install -y --no-install-recommends \
   firmware-misc-nonfree \
   intel-microcode \
   amd64-microcode \
-  intel-media-va-driver \
   || true
 
 install -d /etc/modprobe.d
-cat > /etc/modprobe.d/ayuchan-compat-graphics.conf << 'EOF'
-# Intel 核显（ThinkPad 等笔记本常见黑屏）
-options i915 enable_psr=0 enable_fbc=0
-
-# 部分 AMD 笔记本
-options amdgpu dc=0
+cat > /etc/modprobe.d/ayuchan-generic-graphics.conf << 'EOF'
+# 不加载 Intel/AMD/NVIDIA 专用显卡驱动，交给内核通用帧缓冲 + Xorg VESA
+blacklist i915
+blacklist amdgpu
+blacklist radeon
+blacklist nouveau
+blacklist nvidia
+blacklist nvidia_drm
+blacklist nvidia_modeset
 EOF
 
-# 禁用 Plymouth，避免启动黑屏
 if command -v update-rc.d >/dev/null 2>&1; then
   update-rc.d -f plymouth disable 2>/dev/null || true
 fi

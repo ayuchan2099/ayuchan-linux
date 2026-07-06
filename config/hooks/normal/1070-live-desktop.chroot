@@ -1,5 +1,5 @@
 #!/bin/bash
-# LightDM 自动登录 + XFCE（配合 live-config 与 VESA 驱动）
+# LightDM 自动登录 + XFCE（配合 live-config 与通用 VESA 驱动）
 set -e
 
 systemctl unmask lightdm.service 2>/dev/null || true

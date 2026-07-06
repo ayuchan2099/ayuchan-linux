@@ -15,6 +15,6 @@ lb config noauto \
   --iso-publisher "ayuchan" \
   --iso-volume "AYUCHAN" \
   --win32-loader false \
-  --bootappend-live "boot=live components username=ayuchan nomodeset i915.enable_psr=0 i915.enable_fbc=0 live-delay=5 nosplash" \
-  --bootappend-live-failsafe "boot=live components username=ayuchan nomodeset i915.enable_psr=0 live-delay=10 debug nosplash" \
+  --bootappend-live "boot=live components username=ayuchan nomodeset live-delay=5 nosplash" \
+  --bootappend-live-failsafe "boot=live components username=ayuchan nomodeset live-delay=10 debug nosplash" \
   --archive-areas "main contrib non-free non-free-firmware"

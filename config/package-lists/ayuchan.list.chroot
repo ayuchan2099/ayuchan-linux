@@ -51,11 +51,11 @@ fcitx5-frontend-qt6
 calamares
 calamares-settings-debian
 
-# 全平台 Xorg 驱动（main 源，install pass 可安装）
+# 通用 Xorg 驱动（不装 intel/amdgpu/nvidia 等厂商驱动包）
 xserver-xorg
-xserver-xorg-video-all
+xserver-xorg-video-vesa
+xserver-xorg-video-fbdev
 xserver-xorg-input-all
-mesa-utils
 
 # 常用依赖（Chrome / VS Code 由 hook 安装）
 libu2f-udev

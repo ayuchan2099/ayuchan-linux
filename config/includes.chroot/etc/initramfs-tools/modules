@@ -8,5 +8,4 @@ nvme
 xhci_pci
 ehci_pci
 uhci_hcd
-i915
 crc32c-intel
