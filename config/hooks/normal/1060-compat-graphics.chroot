@@ -20,9 +20,6 @@ options i915 enable_psr=0 enable_fbc=0
 
 # 部分 AMD 笔记本
 options amdgpu dc=0
-
-# 部分 NVIDIA 开源驱动冲突
-blacklist nouveau
 EOF
 
 # 禁用 Plymouth，避免启动黑屏

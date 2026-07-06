@@ -1,0 +1,68 @@
+#!/bin/bash
+# LightDM 自动登录 + XFCE（配合 live-config 与 VESA 驱动）
+set -e
+
+systemctl unmask lightdm.service 2>/dev/null || true
+systemctl enable lightdm.service
+systemctl set-default graphical.target
+
+mkdir -p /etc/lightdm/lightdm.conf.d
+cat > /etc/lightdm/lightdm.conf.d/50-ayuchan-autologin.conf << 'EOF'
+[Seat:*]
+autologin-user=ayuchan
+autologin-user-timeout=0
+autologin-session=xfce
+user-session=xfce
+greeter-session=lightdm-gtk-greeter
+xserver-command=X -br -noreset
+EOF
+
+cat > /etc/lightdm/lightdm-gtk-greeter.conf << 'EOF'
+[greeter]
+background=#1a2744
+theme-name=Adwaita-dark
+icon-theme-name=Adwaita
+font-name=Sans 11
+show-indicators=~language;~session;~a11y;~power
+EOF
+
+# 手动恢复桌面的救援脚本（黑屏时在 TTY 执行）
+install -d /usr/local/bin
+cat > /usr/local/bin/ayuchan-start-desktop << 'EOF'
+#!/bin/bash
+echo "正在启动 XFCE 桌面..."
+export DISPLAY=:0
+export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+mkdir -p "$XDG_RUNTIME_DIR"
+chmod 700 "$XDG_RUNTIME_DIR"
+export GTK_IM_MODULE=fcitx QT_IM_MODULE=fcitx XMODIFIERS=@im=fcitx
+systemctl stop lightdm 2>/dev/null || true
+if [ -z "$DBUS_SESSION_BUS_ADDRESS" ]; then
+  eval "$(dbus-launch --sh-syntax --exit-with-session)"
+fi
+fcitx5 -d 2>/dev/null || true
+exec startxfce4
+EOF
+chmod +x /usr/local/bin/ayuchan-start-desktop
+
+cat > /etc/motd << 'EOF'
+
+  Ayuchan Linux Live
+  用户: ayuchan  密码: ayuchan
+
+  若黑屏请按 Ctrl+Alt+F2 登录后执行:
+    ayuchan-start-desktop
+
+EOF
+
+# 简单 .profile，不在 TTY 自动拉 X（交给 LightDM）
+cat > /etc/skel/.profile << 'EOF'
+if [ -n "$BASH_VERSION" ] && [ -f "$HOME/.bashrc" ]; then
+  . "$HOME/.bashrc"
+fi
+EOF
+
+if [[ -d /home/ayuchan ]]; then
+  cp /etc/skel/.profile /home/ayuchan/.profile
+  chown ayuchan:ayuchan /home/ayuchan/.profile
+fi

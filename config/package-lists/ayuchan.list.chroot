@@ -11,6 +11,8 @@ live-tools
 xfce4
 xfce4-goodies
 xfce4-terminal
+lightdm
+lightdm-gtk-greeter
 dbus-user-session
 network-manager-gnome
 thunar
