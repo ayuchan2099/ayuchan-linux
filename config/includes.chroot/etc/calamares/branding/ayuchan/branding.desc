@@ -1,30 +1,20 @@
 ---
-componentName:  ayuchan
-version:        "1.0"
-shortVersion:   "1.0"
-longVersion:    "Ayuchan Linux 1.0"
-shortProductName:   Ayuchan
-longProductName:    Ayuchan Linux
-welcomeStyleCalamares:   true
-welcomeExpCalamares:     true
-productUrl:              https://github.com/ayuchan/ayuchan-linux
-supportUrl:              https://github.com/ayuchan/ayuchan-linux/issues
-knownIssuesUrl:          https://github.com/ayuchan/ayuchan-linux/issues
-releaseNotesUrl:         https://github.com/ayuchan/ayuchan-linux/releases
-donateUrl:               https://github.com/sponsors/ayuchan
+componentName: ayuchan
 
-images:
-    product-logo:           ""
-    product-logo-icon:      ""
-    product-banner:         ""
-
-slideshow:              "show.qml"
+welcomeStyleCalamares: true
+welcomeExpandingLogo: true
 
 strings:
-    productName:            Ayuchan Linux
-    shortProductName:       Ayuchan
-    version:                "1.0"
-    shortVersion:           "1.0"
-    longVersion:            Ayuchan Linux 1.0
-    bootloaderEntryName:    Ayuchan
-    productCopyright:       Copyright 2026 ayuchan
+    productName: Ayuchan Linux
+    shortProductName: Ayuchan
+    version: "1.3"
+    shortVersion: "1.3"
+    longVersion: Ayuchan Linux 1.3
+    bootloaderEntryName: Ayuchan
+    productUrl: https://github.com/ayuchan2099/ayuchan-linux
+    supportUrl: https://github.com/ayuchan2099/ayuchan-linux/issues
+    knownIssuesUrl: https://github.com/ayuchan2099/ayuchan-linux/issues
+    releaseNotesUrl: https://github.com/ayuchan2099/ayuchan-linux/releases
+
+slideshow: show.qml
+slideshowAPI: 1

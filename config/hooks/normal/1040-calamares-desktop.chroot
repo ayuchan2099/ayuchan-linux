@@ -9,11 +9,13 @@ cat > /usr/local/bin/ayuchan-install-gui << 'EOF'
 export DISPLAY="${DISPLAY:-:0}"
 export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
 mkdir -p "$XDG_RUNTIME_DIR"
+chmod 700 "$XDG_RUNTIME_DIR"
 if ! xdpyinfo >/dev/null 2>&1; then
   xfce4-terminal -T "Ayuchan Install" -e "echo '无图形界面，请用文本安装'; read"
   exit 1
 fi
-exec sudo /usr/bin/calamares
+# 必须以普通用户运行 Calamares（sudo 会导致 XDG_RUNTIME_DIR 错误）
+exec calamares
 EOF
 chmod +x /usr/local/bin/ayuchan-install-gui
 
@@ -27,7 +29,7 @@ chmod +x /usr/local/bin/ayuchan-install-text
 
 cat > /etc/sudoers.d/ayuchan-install << 'EOF'
 Defaults:ayuchan !requiretty
-ayuchan ALL=(ALL) NOPASSWD: /usr/bin/calamares, /usr/sbin/calamares, /usr/bin/debian-installer-launcher, /usr/sbin/debian-installer-launcher
+ayuchan ALL=(ALL) NOPASSWD: /usr/bin/debian-installer-launcher, /usr/sbin/debian-installer-launcher
 EOF
 chmod 440 /etc/sudoers.d/ayuchan-install
 

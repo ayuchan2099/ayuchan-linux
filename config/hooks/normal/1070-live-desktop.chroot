@@ -22,7 +22,7 @@ cat > /etc/xdg/autostart/ayuchan-calamares.desktop << 'EOF'
 [Desktop Entry]
 Type=Application
 Name=Calamares Auto Install
-Exec=sh -c 'grep -qs ayuchan-install=1 /proc/cmdline && sleep 8 && sudo calamares'
+Exec=sh -c 'grep -qs ayuchan-install=1 /proc/cmdline && sleep 8 && calamares'
 Hidden=false
 NoDisplay=true
 X-GNOME-Autostart-enabled=true

@@ -24,4 +24,9 @@ sed -i 's/# zh_CN.UTF-8 UTF-8/zh_CN.UTF-8 UTF-8/' /etc/locale.gen
 locale-gen
 update-locale LANG=zh_CN.UTF-8
 
+# 修复 sudo calamares 时「无法解析主机」
+if ! grep -q '[[:space:]]ayuchan$' /etc/hosts; then
+  printf '127.0.0.1\tlocalhost ayuchan\n::1\t\tlocalhost ayuchan ip6-localhost ip6-loopback\n' >> /etc/hosts
+fi
+
 # Live 由 live-config + LightDM 自动登录（1070 hook）
