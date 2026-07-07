@@ -54,6 +54,8 @@ debian-installer-launcher
 cpio
 polkitd
 pkexec
+zenity
+glib2.0-bin
 
 # Xorg（Debian 全驱动包，自动检测显卡）
 xserver-xorg

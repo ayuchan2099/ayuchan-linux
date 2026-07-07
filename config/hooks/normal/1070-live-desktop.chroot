@@ -17,18 +17,6 @@ greeter-session=lightdm-gtk-greeter
 xserver-command=X -br -noreset
 EOF
 
-mkdir -p /etc/xdg/autostart
-cat > /etc/xdg/autostart/ayuchan-calamares.desktop << 'EOF'
-[Desktop Entry]
-Type=Application
-Name=Calamares Auto Install
-Exec=sh -c 'grep -qs ayuchan-install=1 /proc/cmdline && sleep 8 && calamares'
-Hidden=false
-NoDisplay=true
-X-GNOME-Autostart-enabled=true
-OnlyShowIn=XFCE;
-EOF
-
 install -d /usr/local/bin
 
 cat > /usr/local/bin/ayuchan-start-desktop << 'EOF'
@@ -44,7 +32,7 @@ echo "Ayuchan Linux 救援命令:"
 echo "  ayuchan-install-gui        图形安装 Calamares"
 echo "  ayuchan-install-text       文本安装 Debian Installer"
 echo "  systemctl restart lightdm  重启显示管理器"
-echo "  journalctl -b -u lightdm    查看 LightDM 日志"
+echo "  ayuchan-install-check      安装环境诊断"
 EOF
 chmod +x /usr/local/bin/ayuchan-rescue
 
@@ -54,6 +42,7 @@ cat > /etc/motd << 'EOF'
   用户: ayuchan  密码: ayuchan
 
   黑屏: Ctrl+Alt+F2 登录后执行 ayuchan-rescue
-  安装: 启动菜单选「文本安装」或桌面「Install Ayuchan Linux」
+  安装: 双击「Install Ayuchan Linux」或终端执行 ayuchan-install-gui
+  诊断: ayuchan-install-check
 
 EOF

@@ -1,8 +1,56 @@
 #!/bin/bash
-# 安装器：启动脚本、sudo 免密、polkit、桌面快捷方式
+# 安装器：自动配置 squashfs 路径 + 图形/文本安装入口
 set -e
 
 install -d /usr/local/bin /etc/sudoers.d /etc/polkit-1/rules.d
+
+cat > /usr/local/bin/ayuchan-configure-calamares << 'EOF'
+#!/bin/bash
+# 以 root 运行：检测 Live squashfs 并写入 unpackfs.conf
+set -e
+SQUASH=""
+for p in \
+  /run/live/medium/live/filesystem.squashfs \
+  /lib/live/mount/medium/live/filesystem.squashfs \
+  /live/filesystem.squashfs; do
+  if [ -f "$p" ]; then
+    SQUASH="$p"
+    break
+  fi
+done
+if [ -z "$SQUASH" ]; then
+  echo "错误: 未找到 Live squashfs 镜像" >&2
+  exit 1
+fi
+mkdir -p /etc/calamares/modules
+cat > /etc/calamares/modules/unpackfs.conf << CONF
+---
+unpack:
+    - source: "$SQUASH"
+      sourcefs: "squashfs"
+      destination: ""
+CONF
+echo "Calamares unpackfs -> $SQUASH"
+EOF
+chmod 755 /usr/local/bin/ayuchan-configure-calamares
+
+cat > /usr/local/bin/ayuchan-install-check << 'EOF'
+#!/bin/bash
+echo "=== Ayuchan 安装诊断 ==="
+echo "用户: $(id -un)  DISPLAY=${DISPLAY:-未设置}"
+for p in \
+  /run/live/medium/live/filesystem.squashfs \
+  /lib/live/mount/medium/live/filesystem.squashfs \
+  /lib/live/mount/medium/install/initrd.gz \
+  /run/live/medium/install/initrd.gz; do
+  if [ -e "$p" ]; then echo "[OK] $p"; else echo "[--] $p"; fi
+done
+echo "---"
+command -v calamares >/dev/null && calamares --version 2>/dev/null | head -1 || echo "calamares: 未安装"
+command -v debian-installer-launcher >/dev/null && echo "debian-installer-launcher: OK" || echo "debian-installer-launcher: 未安装"
+[ -f /etc/calamares/modules/unpackfs.conf ] && echo "--- unpackfs.conf ---" && cat /etc/calamares/modules/unpackfs.conf
+EOF
+chmod 755 /usr/local/bin/ayuchan-install-check
 
 cat > /usr/local/bin/ayuchan-install-gui << 'EOF'
 #!/bin/bash
@@ -10,38 +58,52 @@ export DISPLAY="${DISPLAY:-:0}"
 export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
 mkdir -p "$XDG_RUNTIME_DIR"
 chmod 700 "$XDG_RUNTIME_DIR"
+LOG="${HOME}/.local/share/ayuchan/calamares.log"
+mkdir -p "$(dirname "$LOG")"
+
 if ! xdpyinfo >/dev/null 2>&1; then
-  xfce4-terminal -T "Ayuchan Install" -e "echo '无图形界面，请用文本安装'; read"
+  xfce4-terminal -T "Ayuchan Install" -e "ayuchan-install-check; echo; read -p '按回车关闭...'"
   exit 1
 fi
-# 必须以普通用户运行 Calamares（sudo 会导致 XDG_RUNTIME_DIR 错误）
-exec calamares
+
+if ! sudo /usr/local/bin/ayuchan-configure-calamares; then
+  zenity --error --text="未找到 Live 系统镜像 (squashfs)。\n请运行: ayuchan-install-check" 2>/dev/null \
+    || xfce4-terminal -e "ayuchan-install-check; read"
+  exit 1
+fi
+
+calamares 2>&1 | tee "$LOG"
+status=${PIPESTATUS[0]}
+if [ "$status" -ne 0 ]; then
+  zenity --error --text="Calamares 启动失败 (代码 $status)\n日志: $LOG" 2>/dev/null \
+    || xfce4-terminal -e "echo 安装器失败; tail -20 '$LOG'; read"
+fi
+exit "$status"
 EOF
-chmod +x /usr/local/bin/ayuchan-install-gui
+chmod 755 /usr/local/bin/ayuchan-install-gui
 
 cat > /usr/local/bin/ayuchan-install-text << 'EOF'
 #!/bin/bash
 export DISPLAY="${DISPLAY:-:0}"
-# 文本/图形 Debian 安装器（从 Live 介质启动 d-i）
+INITRD=""
+for p in /lib/live/mount/medium/install/initrd.gz /run/live/medium/install/initrd.gz; do
+  [ -f "$p" ] && INITRD="$p" && break
+done
+if [ -z "$INITRD" ]; then
+  zenity --error --text="未找到 Debian 文本安装器 (initrd.gz)\n请从 GRUB 菜单选 Install 启动" 2>/dev/null \
+    || { echo "未找到 initrd.gz"; ayuchan-install-check; }
+  exit 1
+fi
 exec sudo /usr/bin/debian-installer-launcher
 EOF
-chmod +x /usr/local/bin/ayuchan-install-text
+chmod 755 /usr/local/bin/ayuchan-install-text
 
 cat > /etc/sudoers.d/ayuchan-install << 'EOF'
 Defaults:ayuchan !requiretty
+ayuchan ALL=(ALL) NOPASSWD: /usr/local/bin/ayuchan-configure-calamares
 ayuchan ALL=(ALL) NOPASSWD: /usr/bin/debian-installer-launcher, /usr/sbin/debian-installer-launcher
 EOF
 chmod 440 /etc/sudoers.d/ayuchan-install
-
-cat > /etc/polkit-1/rules.d/49-ayuchan-install.rules << 'EOF'
-polkit.addRule(function(action, subject) {
-    if (subject.user == "ayuchan" && subject.local && subject.active) {
-        if (action.id.indexOf("org.freedesktop.policykit.exec") == 0) {
-            return polkit.Result.YES;
-        }
-    }
-});
-EOF
 
 install -d /usr/share/applications
 
@@ -69,30 +131,54 @@ Name[zh_CN]=文本安装 Ayuchan Linux
 Comment=Debian text installer
 Comment[zh_CN]=Debian 文本安装器
 Icon=debian-installer
-Exec=/usr/local/bin/ayuchan-install-text
+Exec=xfce4-terminal -T "Text Install" -e ayuchan-install-text
 Terminal=false
 Categories=System;
 StartupNotify=true
+EOF
+
+cat > /usr/share/applications/ayuchan-install-check.desktop << 'EOF'
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Check Install Environment
+Name[zh_CN]=安装环境诊断
+Comment=Diagnose installer paths
+Icon=utilities-terminal
+Exec=xfce4-terminal -T "Install Check" -e "ayuchan-install-check; read -p '按回车关闭...'"
+Terminal=false
+Categories=System;
 EOF
 
 for desk in /etc/skel/Desktop /home/ayuchan/Desktop; do
   install -d "$desk"
   cp /usr/share/applications/ayuchan-install-gui.desktop "$desk/Install Ayuchan Linux.desktop"
   cp /usr/share/applications/ayuchan-install-text.desktop "$desk/Text Install Ayuchan Linux.desktop"
-  chmod +x "$desk/Install Ayuchan Linux.desktop" "$desk/Text Install Ayuchan Linux.desktop"
+  cp /usr/share/applications/ayuchan-install-check.desktop "$desk/Install Check.desktop"
+  chmod +x "$desk/"*.desktop
 done
 
 if id ayuchan >/dev/null 2>&1; then
   chown -R ayuchan:ayuchan /home/ayuchan/Desktop 2>/dev/null || true
 fi
 
-# 开机标记 XFCE 桌面快捷方式为可执行（否则双击无反应）
 install -d /etc/xdg/autostart
 cat > /etc/xdg/autostart/ayuchan-trust-desktop.desktop << 'EOF'
 [Desktop Entry]
 Type=Application
 Name=Trust Ayuchan Desktop Launchers
-Exec=sh -c 'sleep 3; for f in "$HOME/Desktop/"*.desktop; do [ -f "$f" ] && gio set "$f" metadata::trusted true 2>/dev/null; chmod +x "$f"; done'
+Exec=sh -c 'sleep 5; for f in "$HOME/Desktop/"*.desktop; do [ -f "$f" ] && gio set "$f" metadata::trusted true 2>/dev/null; chmod +x "$f"; done'
+Hidden=true
+NoDisplay=true
+X-GNOME-Autostart-enabled=true
+OnlyShowIn=XFCE;
+EOF
+
+cat > /etc/xdg/autostart/ayuchan-calamares.desktop << 'EOF'
+[Desktop Entry]
+Type=Application
+Name=Calamares Auto Install
+Exec=sh -c 'grep -qs ayuchan-install=1 /proc/cmdline && sleep 10 && ayuchan-install-gui'
 Hidden=true
 NoDisplay=true
 X-GNOME-Autostart-enabled=true

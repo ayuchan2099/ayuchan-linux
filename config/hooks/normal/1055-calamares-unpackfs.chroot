@@ -1,0 +1,23 @@
+#!/bin/bash
+# Calamares live 安装：写入正确的 squashfs 路径（initramfs-tools 标准）
+set -e
+
+mkdir -p /etc/calamares/modules
+
+cat > /etc/calamares/modules/unpackfs.conf << 'EOF'
+---
+unpack:
+    - source: "/run/live/medium/live/filesystem.squashfs"
+      sourcefs: "squashfs"
+      destination: ""
+EOF
+
+# 安装时保留 live 专用 polkit 规则（安装完成后由 calamares removeuser 清理）
+install -d /etc/polkit-1/rules.d
+cat > /etc/polkit-1/rules.d/50-ayuchan-live.rules << 'EOF'
+polkit.addRule(function(action, subject) {
+    if (subject.user == "ayuchan" && subject.local && subject.active) {
+        return polkit.Result.YES;
+    }
+});
+EOF
