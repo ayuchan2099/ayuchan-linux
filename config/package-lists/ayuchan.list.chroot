@@ -61,6 +61,8 @@ glib2.0-bin
 xserver-xorg
 xserver-xorg-video-all
 xserver-xorg-input-all
+x11-utils
+x11-xserver-utils
 
 # 常用依赖
 libu2f-udev

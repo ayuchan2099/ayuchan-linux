@@ -15,6 +15,3 @@ strings:
     supportUrl: https://github.com/ayuchan2099/ayuchan-linux/issues
     knownIssuesUrl: https://github.com/ayuchan2099/ayuchan-linux/issues
     releaseNotesUrl: https://github.com/ayuchan2099/ayuchan-linux/releases
-
-slideshow: show.qml
-slideshowAPI: 1
