@@ -60,13 +60,44 @@ echo "---"
 command -v calamares >/dev/null && calamares --version 2>/dev/null | head -1 || echo "calamares: 未安装"
 command -v debian-installer-launcher >/dev/null && echo "debian-installer-launcher: OK" || echo "debian-installer-launcher: 未安装"
 echo "--- settings.conf ---"
-[ -f /etc/calamares/settings.conf ] && grep -E '^(instance|branding|module-config):' /etc/calamares/settings.conf
+if [ -f /etc/calamares/settings.conf ]; then
+  grep -E '^(instance|branding|module-config):' /etc/calamares/settings.conf
+  if grep -q '^sequence:' /etc/calamares/settings.conf; then
+    echo "[OK] settings.conf 含 sequence（Calamares 必需）"
+  else
+    echo "[!!] settings.conf 缺少 sequence — Calamares 会报 fatal: no sequence set"
+  fi
+else
+  echo "[!!] 未找到 /etc/calamares/settings.conf"
+fi
 [ -f /etc/calamares/modules/unpackfs.conf ] && echo "--- unpackfs.conf ---" && cat /etc/calamares/modules/unpackfs.conf
 echo "--- 建议 ---"
 echo "图形安装: ayuchan-install-gui"
 echo "文本安装: ayuchan-install-text  或 GRUB 菜单选 Install"
 EOF
 chmod 755 /usr/local/bin/ayuchan-install-check
+
+cat > /usr/local/bin/ayuchan-install-check-wait << 'EOF'
+#!/bin/bash
+/usr/local/bin/ayuchan-install-check
+echo
+read -r -p "按回车关闭..." _
+EOF
+chmod 755 /usr/local/bin/ayuchan-install-check-wait
+
+cat > /usr/local/bin/ayuchan-install-check-term << 'EOF'
+#!/bin/bash
+export DISPLAY="${DISPLAY:-:0}"
+exec xfce4-terminal --hold -T "Install Check" -e /usr/local/bin/ayuchan-install-check-wait
+EOF
+chmod 755 /usr/local/bin/ayuchan-install-check-term
+
+cat > /usr/local/bin/ayuchan-install-text-term << 'EOF'
+#!/bin/bash
+export DISPLAY="${DISPLAY:-:0}"
+exec xfce4-terminal --hold -T "Text Install" -e /usr/local/bin/ayuchan-install-text
+EOF
+chmod 755 /usr/local/bin/ayuchan-install-text-term
 
 cat > /usr/local/bin/ayuchan-install-gui << 'EOF'
 #!/bin/bash
@@ -78,13 +109,13 @@ LOG="${HOME}/.local/share/ayuchan/calamares.log"
 mkdir -p "$(dirname "$LOG")"
 
 if ! xset q >/dev/null 2>&1 && ! xdpyinfo >/dev/null 2>&1; then
-  xfce4-terminal -T "Ayuchan Install" -e "ayuchan-install-check; echo; read -p '按回车关闭...'"
+  /usr/local/bin/ayuchan-install-check-term
   exit 1
 fi
 
 if ! sudo /usr/local/bin/ayuchan-configure-calamares; then
   zenity --error --text="未找到 Live 系统镜像 (squashfs)。\n请运行: ayuchan-install-check" 2>/dev/null \
-    || xfce4-terminal -e "ayuchan-install-check; read"
+    || /usr/local/bin/ayuchan-install-check-term
   exit 1
 fi
 
@@ -147,7 +178,7 @@ Name[zh_CN]=文本安装 Ayuchan Linux
 Comment=Debian text installer
 Comment[zh_CN]=Debian 文本安装器
 Icon=debian-installer
-Exec=xfce4-terminal -T "Text Install" -e ayuchan-install-text
+Exec=/usr/local/bin/ayuchan-install-text-term
 Terminal=false
 Categories=System;
 StartupNotify=true
@@ -161,7 +192,7 @@ Name=Check Install Environment
 Name[zh_CN]=安装环境诊断
 Comment=Diagnose installer paths
 Icon=utilities-terminal
-Exec=xfce4-terminal -T "Install Check" -e "ayuchan-install-check; read -p '按回车关闭...'"
+Exec=/usr/local/bin/ayuchan-install-check-term
 Terminal=false
 Categories=System;
 EOF
