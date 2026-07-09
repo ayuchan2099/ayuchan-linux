@@ -58,7 +58,9 @@ for p in \
 done
 echo "---"
 command -v calamares >/dev/null && calamares --version 2>/dev/null | head -1 || echo "calamares: 未安装"
-command -v debian-installer-launcher >/dev/null && echo "debian-installer-launcher: OK" || echo "debian-installer-launcher: 未安装"
+command -v debian-installer-launcher >/dev/null && echo "debian-installer-launcher: OK ($(command -v debian-installer-launcher))" \
+  || { [ -x /usr/sbin/debian-installer-launcher ] && echo "debian-installer-launcher: OK (/usr/sbin/debian-installer-launcher)" \
+  || echo "debian-installer-launcher: 未安装"; }
 echo "--- settings.conf ---"
 if [ -f /etc/calamares/settings.conf ]; then
   grep -E '^(instance|branding|module-config):' /etc/calamares/settings.conf
@@ -141,14 +143,26 @@ if [ -z "$INITRD" ]; then
     || { echo "未找到 initrd.gz"; ayuchan-install-check; }
   exit 1
 fi
-exec sudo /usr/bin/debian-installer-launcher
+LAUNCHER=""
+for p in /usr/sbin/debian-installer-launcher /usr/bin/debian-installer-launcher; do
+  [ -x "$p" ] && LAUNCHER="$p" && break
+done
+if [ -z "$LAUNCHER" ]; then
+  LAUNCHER="$(command -v debian-installer-launcher 2>/dev/null || true)"
+fi
+if [ -z "$LAUNCHER" ]; then
+  zenity --error --text="未找到 debian-installer-launcher\n请安装 debian-installer-launcher 包" 2>/dev/null \
+    || { echo "未找到 debian-installer-launcher"; ayuchan-install-check; }
+  exit 1
+fi
+exec sudo "$LAUNCHER"
 EOF
 chmod 755 /usr/local/bin/ayuchan-install-text
 
 cat > /etc/sudoers.d/ayuchan-install << 'EOF'
 Defaults:ayuchan !requiretty
 ayuchan ALL=(ALL) NOPASSWD: /usr/local/bin/ayuchan-configure-calamares
-ayuchan ALL=(ALL) NOPASSWD: /usr/bin/debian-installer-launcher, /usr/sbin/debian-installer-launcher
+ayuchan ALL=(ALL) NOPASSWD: /usr/sbin/debian-installer-launcher, /usr/bin/debian-installer-launcher
 EOF
 chmod 440 /etc/sudoers.d/ayuchan-install
 
