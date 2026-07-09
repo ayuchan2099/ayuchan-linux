@@ -9,6 +9,8 @@ lb config noauto \
   --debian-installer live \
   --debian-installer-gui false \
   --binary-images iso-hybrid \
+  --bootloaders "syslinux,grub-efi" \
+  --uefi-secure-boot disable \
   --apt-indices false \
   --memtest none \
   --iso-application "Ayuchan Linux Live" \

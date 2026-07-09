@@ -45,6 +45,16 @@ if [[ -n "$ISO" ]]; then
   echo ""
   echo "构建完成: $ISO"
   sha256sum "$ISO" | tee "${ISO}.sha256"
+  if command -v xorriso >/dev/null 2>&1; then
+    echo ""
+    echo "==> 引导检查"
+    xorriso -indev "$ISO" -report_el_torito as_mkisofs 2>/dev/null | sed -n '1,6p' || true
+    if xorriso -indev "$ISO" -find /boot/grub/efi.img -name . 2>/dev/null | grep -q efi.img; then
+      echo "[OK] UEFI 引导文件 boot/grub/efi.img 存在"
+    else
+      echo "[!!] 未找到 UEFI 引导文件，虚拟机 UEFI 模式可能 Boot failed"
+    fi
+  fi
 else
   echo "构建可能失败，请查看 build.log"
   exit 1

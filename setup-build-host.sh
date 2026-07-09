@@ -17,6 +17,10 @@ apt-get install -y \
   syslinux \
   isolinux \
   genisoimage \
+  grub-pc-bin \
+  grub-efi-amd64-bin \
+  grub2-common \
+  mtools \
   git \
   curl \
   wget
