@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Partition Editor
+Name[zh_CN]=分区工具
+Comment=Disk partition manager
+Icon=gparted
+Exec=gparted
+Terminal=false
+Categories=AyuchanSystem;System;
+OnlyShowIn=XFCE;

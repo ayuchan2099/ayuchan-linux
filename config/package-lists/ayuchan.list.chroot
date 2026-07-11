@@ -11,6 +11,10 @@ live-tools
 xfce4
 xfce4-goodies
 xfce4-terminal
+xfce4-whiskermenu-plugin
+xfce4-genmon-plugin
+xfce4-pulseaudio-plugin
+xfce4-power-manager
 lightdm
 lightdm-gtk-greeter
 dbus-user-session
@@ -37,6 +41,7 @@ dbus-x11
 # 中文
 fonts-noto-cjk
 fonts-noto-cjk-extra
+fonts-noto-serif-cjk
 locales
 im-config
 
@@ -64,8 +69,9 @@ xserver-xorg-input-all
 x11-utils
 x11-xserver-utils
 
-# 应用商店
+# 应用商店与桌面 Shell
 python3
+ufw
 
 # 常用依赖
 libu2f-udev

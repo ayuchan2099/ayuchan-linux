@@ -1,0 +1,146 @@
+#!/usr/bin/env python3
+# Ayuchan 统一搜索：应用 / 文件 / 设置
+import os
+import subprocess
+import sys
+
+TITLE = "Ayuchan 搜索"
+DESKTOP_DIRS = [
+    "/usr/share/applications",
+    "/usr/local/share/applications",
+    os.path.expanduser("~/.local/share/applications"),
+]
+
+SETTINGS = [
+    ("网络设置", "nm-connection-editor", "network"),
+    ("显示设置", "xfce4-display-settings", "display"),
+    ("声音设置", "pavucontrol", "audio"),
+    ("输入法设置", "fcitx5-config-qt", "input"),
+    ("系统设置", "xfce4-settings-manager", "settings"),
+    ("Ayuchan 控制中心", "ayuchan-control-center", "ayuchan-control-center"),
+    ("桌面风格", "ayuchan-theme-switcher", "preferences-desktop-theme"),
+    ("应用商店", "ayuchan-app-store", "ayuchan-app-store"),
+    ("壁纸选择", "ayuchan-wallpaper-picker", "preferences-desktop-wallpaper"),
+]
+
+
+def parse_desktop(path):
+    name = None
+    exec_cmd = None
+    icon = "application-x-executable"
+    try:
+        with open(path, encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if line.startswith("Name[zh_CN]="):
+                    name = line.split("=", 1)[1]
+                elif line.startswith("Name=") and not name:
+                    name = line.split("=", 1)[1]
+                elif line.startswith("Exec=") and not exec_cmd:
+                    exec_cmd = line.split("=", 1)[1].split()[0]
+                elif line.startswith("Icon="):
+                    icon = line.split("=", 1)[1]
+        if name and exec_cmd and "NoDisplay=true" not in open(path, encoding="utf-8").read():
+            return name, exec_cmd, icon, "应用"
+    except OSError:
+        pass
+    return None
+
+
+def find_apps():
+    seen = set()
+    results = []
+    for d in DESKTOP_DIRS:
+        if not os.path.isdir(d):
+            continue
+        for fname in sorted(os.listdir(d)):
+            if not fname.endswith(".desktop"):
+                continue
+            key = fname
+            if key in seen:
+                continue
+            seen.add(key)
+            item = parse_desktop(os.path.join(d, fname))
+            if item:
+                results.append(item)
+    return results
+
+
+def find_files(query):
+    home = os.path.expanduser("~")
+    results = []
+    q = query.lower()
+    for base in [home, os.path.join(home, "Documents"), os.path.join(home, "Downloads"), os.path.join(home, "Desktop")]:
+        if not os.path.isdir(base):
+            continue
+        for root, dirs, files in os.walk(base):
+            depth = root[len(base):].count(os.sep)
+            if depth > 2:
+                dirs[:] = []
+                continue
+            for fn in files:
+                if q in fn.lower():
+                    path = os.path.join(root, fn)
+                    results.append((fn, f"xdg-open '{path}'", "text-x-generic", "文件"))
+                    if len(results) >= 15:
+                        return results
+    return results
+
+
+def zenity_list(items, query):
+    if not items:
+        subprocess.run([
+            "zenity", "--info", "--title", TITLE,
+            "--text", f"未找到与「{query}」相关的结果"
+        ])
+        return
+    lines = []
+    for name, cmd, icon, kind in items[:40]:
+        lines.append(f"{name}\t{kind}\t{cmd}")
+    proc = subprocess.run([
+        "zenity", "--list", "--title", TITLE, "--width=620", "--height=420",
+        "--text", f"搜索: {query}",
+        "--column=名称", "--column=类型", "--column=命令",
+        "--hide-column=3"
+    ], input="\n".join(lines), capture_output=True, text=True)
+    if proc.returncode != 0 or not proc.stdout.strip():
+        return
+    parts = proc.stdout.strip().split("|")
+    cmd = parts[2] if len(parts) >= 3 else ""
+    if cmd:
+        subprocess.Popen(cmd, shell=True)
+
+
+def main():
+    os.environ.setdefault("DISPLAY", ":0")
+    query = subprocess.run(
+        ["zenity", "--entry", "--title", TITLE,
+         "--text", "搜索应用、文件、设置", "--entry-text", ""],
+        capture_output=True, text=True
+    )
+    if query.returncode != 0:
+        return
+    q = query.stdout.strip()
+    if not q:
+        subprocess.Popen(["xfce4-appfinder"])
+        return
+
+    items = []
+    for name, cmd, icon, kind in find_apps():
+        if q.lower() in name.lower():
+            items.append((name, cmd, icon, kind))
+    for name, cmd, icon in SETTINGS:
+        if q.lower() in name.lower():
+            items.append((name, cmd, icon, "设置"))
+    items.extend(find_files(q))
+
+    if not items and len(q) >= 2:
+        items = find_apps()[:8]
+        for name, cmd, icon in SETTINGS:
+            items.append((name, cmd, icon, "设置"))
+
+    zenity_list(items, q)
+
+
+if __name__ == "__main__":
+    main()

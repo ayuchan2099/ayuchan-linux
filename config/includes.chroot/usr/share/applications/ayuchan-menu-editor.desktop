@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Text Editor
+Name[zh_CN]=记事本
+Comment=Simple text editor
+Icon=accessories-text-editor
+Exec=mousepad
+Terminal=false
+Categories=AyuchanFavorite;AyuchanOffice;
+OnlyShowIn=XFCE;

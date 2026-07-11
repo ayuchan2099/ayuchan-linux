@@ -1,0 +1,126 @@
+/* Ayuchan-gtk — 基于品牌色系的 GTK3 主题 */
+@define-color ayuchan_primary #1A3A5C;
+@define-color ayuchan_accent #2D6CDF;
+@define-color ayuchan_bg #0F1729;
+@define-color ayuchan_surface #1E293B;
+@define-color ayuchan_text #E8EDF4;
+@define-color ayuchan_text_secondary #94A3B8;
+@define-color ayuchan_success #22C55E;
+@define-color ayuchan_warning #F59E0B;
+@define-color ayuchan_danger #EF4444;
+
+* {
+  font-family: "Noto Sans CJK SC", "Noto Sans", sans-serif;
+}
+
+window, dialog {
+  background-color: @ayuchan_bg;
+  color: @ayuchan_text;
+}
+
+headerbar, .titlebar {
+  background-color: @ayuchan_primary;
+  color: @ayuchan_text;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+button {
+  background-color: @ayuchan_surface;
+  color: @ayuchan_text;
+  border: 1px solid alpha(@ayuchan_text, 0.08);
+  border-radius: 8px;
+  padding: 6px 14px;
+}
+
+button:hover {
+  background-color: @ayuchan_accent;
+  color: white;
+}
+
+button.suggested-action,
+button:checked {
+  background-color: @ayuchan_accent;
+  color: white;
+}
+
+button.destructive-action {
+  background-color: @ayuchan_danger;
+  color: white;
+}
+
+entry, spinbutton, combobox {
+  background-color: @ayuchan_surface;
+  color: @ayuchan_text;
+  border: 1px solid alpha(@ayuchan_text_secondary, 0.25);
+  border-radius: 8px;
+  padding: 6px 10px;
+}
+
+entry:focus, combobox:focus {
+  border-color: @ayuchan_accent;
+}
+
+notebook tab {
+  background-color: @ayuchan_surface;
+  color: @ayuchan_text_secondary;
+  border-radius: 8px 8px 0 0;
+  padding: 8px 16px;
+}
+
+notebook tab:checked {
+  background-color: @ayuchan_primary;
+  color: @ayuchan_text;
+}
+
+treeview, list {
+  background-color: @ayuchan_bg;
+  color: @ayuchan_text;
+}
+
+treeview:selected, list row:selected {
+  background-color: @ayuchan_accent;
+  color: white;
+}
+
+menubar, menu, .popup {
+  background-color: @ayuchan_surface;
+  color: @ayuchan_text;
+  border-radius: 8px;
+}
+
+menuitem:hover {
+  background-color: @ayuchan_accent;
+  color: white;
+}
+
+scrollbar slider {
+  background-color: @ayuchan_primary;
+  border-radius: 8px;
+}
+
+progressbar trough {
+  background-color: @ayuchan_surface;
+  border-radius: 8px;
+}
+
+progressbar progress {
+  background-color: @ayuchan_accent;
+  border-radius: 8px;
+}
+
+switch {
+  background-color: @ayuchan_surface;
+  border-radius: 14px;
+}
+
+switch:checked {
+  background-color: @ayuchan_accent;
+}
+
+.tooltip {
+  background-color: @ayuchan_surface;
+  color: @ayuchan_text;
+  border: 1px solid alpha(@ayuchan_accent, 0.4);
+  border-radius: 8px;
+}

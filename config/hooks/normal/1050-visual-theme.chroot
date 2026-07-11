@@ -1,38 +1,6 @@
 #!/bin/bash
-# XFCE 纯色背景（不用 SVG，避免部分机器渲染失败）
+# 输入法自启动（视觉主题由 1100-ayuchan-shell 统一管理）
 set -e
-
-mkdir -p /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml
-cat > /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml << 'EOF'
-<?xml version="1.0" encoding="UTF-8"?>
-<channel name="xfce4-desktop" version="1.0">
-  <property name="backdrop" type="empty">
-    <property name="screen0" type="empty">
-      <property name="monitor0" type="empty">
-        <property name="color-style" type="int" value="0"/>
-        <property name="image-style" type="int" value="0"/>
-        <property name="rgba1" type="array">
-          <property name="alpha" type="double" value="1"/>
-          <property name="red" type="double" value="0.102"/>
-          <property name="green" type="double" value="0.153"/>
-          <property name="blue" type="double" value="0.267"/>
-        </property>
-      </property>
-    </property>
-  </property>
-</channel>
-EOF
-
-mkdir -p /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml
-cat > /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml << 'EOF'
-<?xml version="1.0" encoding="UTF-8"?>
-<channel name="xsettings" version="1.0">
-  <property name="Net" type="empty">
-    <property name="ThemeName" type="string" value="Adwaita-dark"/>
-    <property name="IconThemeName" type="string" value="Adwaita"/>
-  </property>
-</channel>
-EOF
 
 mkdir -p /etc/xdg/autostart
 cat > /etc/xdg/autostart/fcitx5.desktop << 'EOF'
@@ -42,14 +10,3 @@ Name=Fcitx5
 Exec=fcitx5 -d
 OnlyShowIn=XFCE;
 EOF
-
-apply_theme() {
-  local user="$1"
-  local home="/home/$user"
-  [[ -d "$home" ]] || return 0
-  install -d "$home/.config/xfce4/xfconf/xfce-perchannel-xml"
-  cp -a /etc/skel/.config/xfce4 "$home/.config/" 2>/dev/null || true
-  chown -R "$user:$user" "$home/.config" 2>/dev/null || true
-}
-
-apply_theme ayuchan

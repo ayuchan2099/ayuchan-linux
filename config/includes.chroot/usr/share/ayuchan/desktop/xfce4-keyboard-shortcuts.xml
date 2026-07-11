@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<channel name="xfce4-keyboard-shortcuts" version="1.0">
+  <property name="commands" type="empty">
+    <property name="default" type="empty">
+      <property name="&lt;Super&gt;" type="string" value="xfce4-popup-whiskermenu"/>
+      <property name="&lt;Super&gt;f" type="string" value="ayuchan-search"/>
+      <property name="&lt;Super&gt;e" type="string" value="thunar"/>
+      <property name="&lt;Super&gt;r" type="string" value="xfce4-appfinder"/>
+      <property name="&lt;Super&gt;i" type="string" value="ayuchan-control-center"/>
+    </property>
+  </property>
+  <property name="xfwm4" type="empty">
+    <property name="default" type="empty">
+      <property name="&lt;Super&gt;Tab" type="string" value="cycle_windows_key"/>
+    </property>
+  </property>
+</channel>

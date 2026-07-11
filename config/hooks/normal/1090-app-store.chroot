@@ -26,9 +26,10 @@ Comment[zh_CN]=浏览并安装常用应用程序
 Icon=system-software-install
 Exec=/usr/local/bin/ayuchan-app-store
 Terminal=false
-Categories=PackageManager;System;
+Categories=PackageManager;System;AyuchanSystem;
 StartupNotify=true
 Keywords=store;software;install;应用;商店;软件;
+Icon=ayuchan-app-store
 EOF
 
 for desk in /etc/skel/Desktop /home/ayuchan/Desktop; do

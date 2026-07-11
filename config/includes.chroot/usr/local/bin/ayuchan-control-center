@@ -1,0 +1,67 @@
+#!/bin/bash
+# Ayuchan 控制中心 — 网络/显示/声音/输入法/更新/安全 统一入口
+set -euo pipefail
+
+export DISPLAY="${DISPLAY:-:0}"
+TITLE="Ayuchan 控制中心"
+
+show_security() {
+  local fw ufw_status
+  if command -v ufw >/dev/null 2>&1; then
+    ufw_status="$(ufw status 2>/dev/null | head -1 || echo '未知')"
+  else
+    ufw_status="UFW 未安装"
+  fi
+  zenity --info --title="$TITLE — 安全" --width=420 --text="防火墙: ${ufw_status}\n\n建议:\n• 保持防火墙开启\n• 定期安装系统更新\n• 使用应用商店安装软件" 2>/dev/null
+}
+
+show_updates() {
+  (
+    echo 10; echo "# 检查更新..."
+    apt-get update -qq 2>/dev/null || true
+    echo 50; echo "# 正在计算可更新包..."
+    upgradable="$(apt-get -s upgrade 2>/dev/null | grep -c '^Inst' || echo 0)"
+    echo 100; echo "# 完成"
+    echo "$upgradable" > /tmp/ayuchan-upgradable.count
+  ) | zenity --progress --title="$TITLE — 系统更新" --auto-close 2>/dev/null || true
+  count="$(cat /tmp/ayuchan-upgradable.count 2>/dev/null || echo 0)"
+  rm -f /tmp/ayuchan-upgradable.count
+  if zenity --question --title="$TITLE" --text="发现 ${count} 个可更新软件包。\n是否打开应用商店安装工具？" 2>/dev/null; then
+    if command -v synaptic >/dev/null 2>&1; then
+      pkexec synaptic 2>/dev/null || synaptic &
+    else
+      xfce4-terminal -e "sudo apt-get upgrade" &
+    fi
+  fi
+}
+
+while true; do
+  choice="$(zenity --list --title="$TITLE" --width=480 --height=460 \
+    --text="统一管理网络、显示、声音、输入法、更新与安全" \
+    --column="功能" --column="说明" \
+    "网络" "WiFi / 有线 / VPN 连接管理" \
+    "显示" "分辨率、缩放、多显示器" \
+    "声音" "输出设备与音量控制" \
+    "输入法" "Fcitx5 拼音输入法配置" \
+    "系统更新" "检查并安装 Debian 安全更新" \
+    "安全" "防火墙状态与安全建议" \
+    "应用商店" "浏览安装常用软件" \
+    "桌面风格" "切换深色/浅色/蓝白主题" \
+    "壁纸" "选择季节壁纸" \
+    "关于" "系统版本与 Ayuchan Linux 信息" \
+    2>/dev/null)" || exit 0
+
+  case "$choice" in
+    网络)    exec nm-connection-editor ;;
+    显示)    exec xfce4-display-settings ;;
+    声音)    exec pavucontrol ;;
+    输入法)  exec fcitx5-config-qt ;;
+    系统更新) show_updates ;;
+    安全)    show_security ;;
+    应用商店) exec ayuchan-app-store ;;
+    桌面风格) exec ayuchan-theme-switcher ;;
+    壁纸)    exec ayuchan-wallpaper-picker ;;
+    关于)    exec xfce4-about ;;
+    *) break ;;
+  esac
+done

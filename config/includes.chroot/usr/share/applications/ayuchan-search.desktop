@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Ayuchan Search
+Name[zh_CN]=Ayuchan 搜索
+Comment=Search apps, files and settings
+Comment[zh_CN]=搜索应用、文件与系统设置
+Icon=ayuchan-search
+Exec=/usr/local/bin/ayuchan-search
+Terminal=false
+Categories=AyuchanFavorite;AyuchanSystem;
+OnlyShowIn=XFCE;

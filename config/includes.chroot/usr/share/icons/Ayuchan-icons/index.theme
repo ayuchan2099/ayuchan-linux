@@ -1,0 +1,27 @@
+[Icon Theme]
+Name=Ayuchan-icons
+Name[zh_CN]=Ayuchan 图标
+Comment=Ayuchan Linux icon theme
+Comment[zh_CN]=Ayuchan Linux 官方图标主题
+Inherits=Adwaita,hicolor
+Directories=apps/48,apps/32,places/48,status/22,actions/48
+
+[apps/48]
+Size=48
+Type=Fixed
+
+[apps/32]
+Size=32
+Type=Fixed
+
+[places/48]
+Size=48
+Type=Fixed
+
+[status/22]
+Size=22
+Type=Fixed
+
+[actions/48]
+Size=48
+Type=Fixed

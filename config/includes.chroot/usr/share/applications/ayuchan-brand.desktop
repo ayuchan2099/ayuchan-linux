@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Ayuchan
+Name[zh_CN]=Ayuchan
+Comment=Ayuchan Linux Desktop
+Icon=ayuchan-logo
+Exec=ayuchan-control-center
+Terminal=false
+Categories=AyuchanFavorite;
+OnlyShowIn=XFCE;

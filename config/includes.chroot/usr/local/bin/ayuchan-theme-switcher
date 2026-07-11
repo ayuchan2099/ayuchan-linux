@@ -1,0 +1,30 @@
+#!/bin/bash
+# Ayuchan Desktop — 图形化切换三种桌面风格
+set -euo pipefail
+
+export DISPLAY="${DISPLAY:-:0}"
+TITLE="Ayuchan 桌面风格"
+CURRENT="${HOME}/.config/ayuchan/current-theme"
+DEFAULT_ID="dark-tech"
+
+if [ -f "$CURRENT" ]; then
+  DEFAULT_ID="$(cat "$CURRENT")"
+fi
+
+mark() {
+  if [ "$1" = "$DEFAULT_ID" ]; then echo "TRUE"; else echo "FALSE"; fi
+}
+
+choice="$(zenity --list --radiolist --title="$TITLE" --width=520 --height=340 \
+  --text="选择桌面风格（可随时切换，立即生效）" \
+  --column="选择" --column="ID" --column="风格" --column="说明" \
+  "$(mark dark-tech)" "dark-tech" "深色科技风" "深色背景，科技蓝强调，适合开发者" \
+  "$(mark light-business)" "light-business" "浅色商务风" "明亮简洁，适合办公与企业" \
+  "$(mark blue-minimal)" "blue-minimal" "蓝白简约风" "蓝白渐变，大气简约" \
+  2>/dev/null)" || exit 0
+
+theme_id="$(echo "$choice" | cut -d'|' -f2)"
+[ -n "$theme_id" ] || theme_id="${choice%%|*}"
+/usr/local/bin/ayuchan-apply-desktop-theme "$theme_id"
+
+zenity --info --title="$TITLE" --text="已切换到「$(grep '^THEME_NAME=' "/usr/share/ayuchan/desktop/themes/${theme_id}.conf" | cut -d= -f2)」\n\n提示：按 Super 键可打开开始菜单" 2>/dev/null || true

@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Archive Manager
+Name[zh_CN]=压缩管理
+Comment=Compress and extract files
+Icon=file-roller
+Exec=file-roller
+Terminal=false
+Categories=AyuchanOffice;Utility;
+OnlyShowIn=XFCE;

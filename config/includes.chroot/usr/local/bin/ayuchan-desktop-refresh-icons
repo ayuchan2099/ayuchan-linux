@@ -1,0 +1,46 @@
+#!/bin/bash
+# Ayuchan Desktop — 刷新桌面默认图标（最多 6 个 + 回收站）
+set -euo pipefail
+
+DESKTOP="${HOME}/Desktop"
+install -d "$DESKTOP"
+
+# 清理旧桌面快捷方式，保持简洁
+find "$DESKTOP" -maxdepth 1 -name '*.desktop' -delete 2>/dev/null || true
+
+link_icon() {
+  local src_name="$1"
+  local dest_name="$2"
+  local src="/usr/share/applications/${src_name}"
+  local dest="${DESKTOP}/${dest_name}"
+  [ -f "$src" ] || return 0
+  cp -f "$src" "$dest"
+  chmod +x "$dest"
+  gio set "$dest" metadata::trusted true 2>/dev/null || true
+}
+
+# 6 个核心图标：浏览器、文件、商店、安装、设置 + 回收站由 xfdesktop 显示
+link_icon "firefox-esr.desktop" "浏览器.desktop"
+link_icon "thunar.desktop" "文件管理.desktop"
+link_icon "ayuchan-app-store.desktop" "应用商店.desktop"
+
+if [ -f /usr/share/applications/ayuchan-install-gui.desktop ]; then
+  link_icon "ayuchan-install-gui.desktop" "安装系统.desktop"
+else
+  link_icon "ayuchan-control-center.desktop" "控制中心.desktop"
+fi
+
+link_icon "xfce4-settings-manager.desktop" "系统设置.desktop"
+
+if command -v xfconf-query >/dev/null 2>&1; then
+  xfconf-query -c xfce4-desktop -p /desktop-icons/style -n -t int -s 2 2>/dev/null \
+    || xfconf-query -c xfce4-desktop -p /desktop-icons/style -s 2 2>/dev/null || true
+  xfconf-query -c xfce4-desktop -p /desktop-icons/show-trash -n -t bool -s true 2>/dev/null \
+    || xfconf-query -c xfce4-desktop -p /desktop-icons/show-trash -s true 2>/dev/null || true
+  xfconf-query -c xfce4-desktop -p /desktop-icons/show-home -n -t bool -s false 2>/dev/null \
+    || xfconf-query -c xfce4-desktop -p /desktop-icons/show-home -s false 2>/dev/null || true
+  xfconf-query -c xfce4-desktop -p /desktop-icons/show-filesystem -n -t bool -s false 2>/dev/null \
+    || xfconf-query -c xfce4-desktop -p /desktop-icons/show-filesystem -s false 2>/dev/null || true
+fi
+
+xfdesktop --reload 2>/dev/null || true

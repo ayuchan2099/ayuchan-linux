@@ -1,0 +1,28 @@
+#!/bin/bash
+# Ayuchan 壁纸选择器
+set -euo pipefail
+
+export DISPLAY="${DISPLAY:-:0}"
+TITLE="Ayuchan 壁纸"
+WALL_DIR="/usr/share/ayuchan/desktop/wallpapers"
+
+choice="$(zenity --list --title="$TITLE" --width=460 --height=360 \
+  --text="选择桌面壁纸（无文字抽象渐变）" \
+  --column="文件" --column="名称" \
+  "wallpaper-default.svg" "默认 · 深海蓝" \
+  "wallpaper-spring.svg" "春季 · 青绿" \
+  "wallpaper-summer.svg" "夏季 · 晴蓝" \
+  "wallpaper-autumn.svg" "秋季 · 暖金" \
+  "wallpaper-winter.svg" "冬季 · 素雪" \
+  2>/dev/null)" || exit 0
+
+wall="${WALL_DIR}/${choice}"
+[ -f "$wall" ] || exit 1
+
+if command -v xfconf-query >/dev/null 2>&1; then
+  xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/image-style -n -t int -s 5 2>/dev/null \
+    || xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/image-style -s 5 2>/dev/null || true
+  xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/last-image -n -t string -s "$wall" 2>/dev/null \
+    || xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/last-image -s "$wall" 2>/dev/null || true
+fi
+xfdesktop --reload 2>/dev/null || true

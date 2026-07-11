@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<channel name="xfce4-panel" version="1.0">
+  <property name="config-rect" type="array">
+    <property name="monitor0" type="array">
+      <property name="panel-0" type="array">
+        <property name="position" type="string" value="p=6.5;x=0;y=0"/>
+        <property name="size" type="uint" value="48"/>
+      </property>
+      <property name="panel-1" type="array">
+        <property name="position" type="string" value="p=0;x=0;y=0"/>
+        <property name="size" type="uint" value="40"/>
+      </property>
+    </property>
+  </property>
+  <property name="panels" type="array">
+    <property name="panel-1" type="array">
+      <property name="autohide-behavior" type="uint" value="0"/>
+      <property name="background-style" type="uint" value="1"/>
+      <property name="background-alpha" type="uint" value="96"/>
+      <property name="background-rgba" type="array">
+        <property name="alpha" type="double" value="0.96"/>
+        <property name="red" type="double" value="0.102"/>
+        <property name="green" type="double" value="0.227"/>
+        <property name="blue" type="double" value="0.361"/>
+      </property>
+      <property name="enter-opacity" type="uint" value="100"/>
+      <property name="leave-opacity" type="uint" value="100"/>
+      <property name="length" type="uint" value="100"/>
+      <property name="length-adjust" type="bool" value="true"/>
+      <property name="mode" type="uint" value="0"/>
+      <property name="plugin-ids" type="array">
+        <property name="plugin-0" type="int" value="10"/>
+        <property name="plugin-1" type="int" value="11"/>
+        <property name="plugin-2" type="int" value="12"/>
+        <property name="plugin-3" type="int" value="13"/>
+        <property name="plugin-4" type="int" value="14"/>
+        <property name="plugin-5" type="int" value="15"/>
+        <property name="plugin-6" type="int" value="16"/>
+        <property name="plugin-7" type="int" value="17"/>
+      </property>
+      <property name="position" type="string" value="p=0;x=0;y=0"/>
+      <property name="positionanchor" type="string" value="p=0;x=0;y=0"/>
+      <property name="size" type="uint" value="40"/>
+    </property>
+    <property name="panel-0" type="array">
+      <property name="autohide-behavior" type="uint" value="0"/>
+      <property name="background-style" type="uint" value="1"/>
+      <property name="background-alpha" type="uint" value="92"/>
+      <property name="background-rgba" type="array">
+        <property name="alpha" type="double" value="0.92"/>
+        <property name="red" type="double" value="0.118"/>
+        <property name="green" type="double" value="0.161"/>
+        <property name="blue" type="double" value="0.231"/>
+      </property>
+      <property name="enter-opacity" type="uint" value="100"/>
+      <property name="leave-opacity" type="uint" value="100"/>
+      <property name="length" type="uint" value="100"/>
+      <property name="length-adjust" type="bool" value="true"/>
+      <property name="mode" type="uint" value="0"/>
+      <property name="plugin-ids" type="array">
+        <property name="plugin-0" type="int" value="0"/>
+        <property name="plugin-1" type="int" value="1"/>
+        <property name="plugin-2" type="int" value="2"/>
+        <property name="plugin-3" type="int" value="3"/>
+        <property name="plugin-4" type="int" value="4"/>
+        <property name="plugin-5" type="int" value="5"/>
+        <property name="plugin-6" type="int" value="6"/>
+        <property name="plugin-7" type="int" value="7"/>
+        <property name="plugin-8" type="int" value="8"/>
+      </property>
+      <property name="position" type="string" value="p=6.5;x=0;y=0"/>
+      <property name="positionanchor" type="string" value="p=6.5;x=0;y=0"/>
+      <property name="size" type="uint" value="48"/>
+    </property>
+  </property>
+  <property name="plugins" type="array">
+    <property name="plugin-0" type="array">
+      <property name="expand" type="bool" value="false"/>
+      <property name="plugin-type" type="string" value="whiskermenu"/>
+      <property name="button-title" type="string" value="开始"/>
+      <property name="button-icon" type="string" value="start-here"/>
+      <property name="show-button-title" type="bool" value="true"/>
+      <property name="show-generic-names" type="bool" value="true"/>
+      <property name="show-recent" type="bool" value="true"/>
+      <property name="recent-items-max" type="int" value="10"/>
+      <property name="view-mode" type="int" value="1"/>
+      <property name="menu-width" type="int" value="420"/>
+      <property name="menu-height" type="int" value="520"/>
+      <property name="menu-file" type="string" value="/etc/xdg/menus/ayuchan-applications.menu"/>
+      <property name="favorites" type="array">
+        <property name="favorites-1" type="string" value="firefox-esr.desktop"/>
+        <property name="favorites-2" type="string" value="thunar.desktop"/>
+        <property name="favorites-3" type="string" value="ayuchan-app-store.desktop"/>
+        <property name="favorites-4" type="string" value="mousepad.desktop"/>
+        <property name="favorites-5" type="string" value="xfce4-terminal.desktop"/>
+        <property name="favorites-6" type="string" value="ayuchan-control-center.desktop"/>
+      </property>
+    </property>
+    <property name="plugin-1" type="array">
+      <property name="plugin-type" type="string" value="separator"/>
+      <property name="expand" type="bool" value="false"/>
+      <property name="style" type="uint" value="0"/>
+    </property>
+    <property name="plugin-2" type="array">
+      <property name="plugin-type" type="string" value="launcher"/>
+      <property name="items" type="array">
+        <property name="item-0" type="string" value="+thunar.desktop"/>
+        <property name="item-1" type="string" value="+firefox-esr.desktop"/>
+        <property name="item-2" type="string" value="+ayuchan-app-store.desktop"/>
+      </property>
+    </property>
+    <property name="plugin-3" type="array">
+      <property name="plugin-type" type="string" value="separator"/>
+      <property name="expand" type="bool" value="false"/>
+      <property name="style" type="uint" value="0"/>
+    </property>
+    <property name="plugin-4" type="array">
+      <property name="expand" type="bool" value="true"/>
+      <property name="plugin-type" type="string" value="tasklist"/>
+      <property name="grouping" type="uint" value="1"/>
+      <property name="show-labels" type="bool" value="false"/>
+      <property name="show-handle" type="bool" value="false"/>
+    </property>
+    <property name="plugin-5" type="array">
+      <property name="plugin-type" type="string" value="separator"/>
+      <property name="expand" type="bool" value="false"/>
+      <property name="style" type="uint" value="0"/>
+    </property>
+    <property name="plugin-6" type="array">
+      <property name="expand" type="bool" value="false"/>
+      <property name="plugin-type" type="string" value="clock"/>
+      <property name="digital-format" type="string" value="%H:%M"/>
+      <property name="tooltip-format" type="string" value="%Y年%m月%d日 %A %H:%M"/>
+    </property>
+    <property name="plugin-7" type="array">
+      <property name="plugin-type" type="string" value="showdesktop"/>
+    </property>
+    <property name="plugin-8" type="array">
+      <property name="plugin-type" type="string" value="separator"/>
+      <property name="expand" type="bool" value="false"/>
+      <property name="style" type="uint" value="1"/>
+    </property>
+    <property name="plugin-10" type="array">
+      <property name="plugin-type" type="string" value="launcher"/>
+      <property name="items" type="array">
+        <property name="item-0" type="string" value="+ayuchan-brand.desktop"/>
+      </property>
+    </property>
+    <property name="plugin-11" type="array">
+      <property name="plugin-type" type="string" value="genmon"/>
+      <property name="cmd" type="string" value="/usr/share/ayuchan/desktop/scripts/genmon-search.sh"/>
+      <property name="textcolor" type="string" value="#94A3B8"/>
+      <property name="clickl" type="string" value="/usr/local/bin/ayuchan-search"/>
+      <property name="clickr" type="string" value="xfce4-appfinder"/>
+      <property name="period" type="int" value="0"/>
+      <property name="use-label" type="bool" value="true"/>
+    </property>
+    <property name="plugin-12" type="array">
+      <property name="plugin-type" type="string" value="separator"/>
+      <property name="expand" type="bool" value="true"/>
+      <property name="style" type="uint" value="0"/>
+    </property>
+    <property name="plugin-13" type="array">
+      <property name="plugin-type" type="string" value="pulseaudio"/>
+      <property name="enable-mpris" type="bool" value="true"/>
+      <property name="show-notifications" type="bool" value="true"/>
+    </property>
+    <property name="plugin-14" type="array">
+      <property name="plugin-type" type="string" value="power-manager-plugin"/>
+    </property>
+    <property name="plugin-15" type="array">
+      <property name="plugin-type" type="string" value="launcher"/>
+      <property name="items" type="array">
+        <property name="item-0" type="string" value="+ayuchan-control-center.desktop"/>
+      </property>
+    </property>
+    <property name="plugin-16" type="array">
+      <property name="expand" type="bool" value="false"/>
+      <property name="plugin-type" type="string" value="systray"/>
+      <property name="known-items" type="array"/>
+      <property name="known-legacy-items" type="array"/>
+    </property>
+    <property name="plugin-17" type="array">
+      <property name="plugin-type" type="string" value="actions"/>
+      <property name="items" type="array">
+        <property name="item-0" type="string" value="+lock-screen"/>
+        <property name="item-1" type="string" value="+separator"/>
+        <property name="item-2" type="string" value="+logout"/>
+        <property name="item-3" type="string" value="+shutdown"/>
+      </property>
+    </property>
+  </property>
+</channel>

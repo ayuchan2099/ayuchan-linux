@@ -1,0 +1,14 @@
+[Desktop Entry]
+Type=X-GNOME-Metatheme
+Name=Ayuchan-gtk
+Name[zh_CN]=Ayuchan 深色主题
+Comment=Ayuchan Linux desktop GTK theme
+Comment[zh_CN]=Ayuchan Linux 官方深色 GTK 主题
+Encoding=UTF-8
+
+[X-GNOME-Metatheme]
+GtkTheme=Ayuchan-gtk
+MetacityTheme=Adwaita
+IconTheme=Ayuchan-icons
+CursorTheme=Adwaita
+ButtonLayout=menu:minimize,maximize,close

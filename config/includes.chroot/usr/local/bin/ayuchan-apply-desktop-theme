@@ -1,0 +1,114 @@
+#!/bin/bash
+# Ayuchan Desktop — 应用指定桌面主题（双栏 + GTK + 壁纸）
+set -euo pipefail
+
+THEME_ID="${1:-}"
+THEME_DIR="/usr/share/ayuchan/desktop/themes"
+CURRENT_FILE="${HOME}/.config/ayuchan/current-theme"
+
+if [ -z "$THEME_ID" ]; then
+  if [ -f "$CURRENT_FILE" ]; then
+    THEME_ID="$(cat "$CURRENT_FILE")"
+  else
+    THEME_ID="dark-tech"
+  fi
+fi
+
+THEME_CONF="${THEME_DIR}/${THEME_ID}.conf"
+if [ ! -f "$THEME_CONF" ]; then
+  echo "未知主题: $THEME_ID" >&2
+  exit 1
+fi
+
+# shellcheck disable=SC1090
+source "$THEME_CONF"
+
+export DISPLAY="${DISPLAY:-:0}"
+mkdir -p "${HOME}/.config/ayuchan" "${HOME}/.config/gtk-3.0" "${HOME}/.config/xfce4/xfconf/xfce-perchannel-xml"
+
+echo "$THEME_ID" > "$CURRENT_FILE"
+
+cat > "${HOME}/.config/gtk-3.0/settings.ini" << EOF
+[Settings]
+gtk-theme-name=${GTK_THEME}
+gtk-icon-theme-name=${ICON_THEME}
+gtk-font-name=${FONT_NAME}
+gtk-cursor-theme-name=Adwaita
+gtk-application-prefer-dark-theme=$([ "$GTK_THEME" = "Ayuchan-gtk" ] && echo 1 || echo 0)
+EOF
+
+cat > "${HOME}/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml" << EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<channel name="xsettings" version="1.0">
+  <property name="Net" type="empty">
+    <property name="ThemeName" type="string" value="${GTK_THEME}"/>
+    <property name="IconThemeName" type="string" value="${ICON_THEME}"/>
+    <property name="FontName" type="string" value="${FONT_NAME}"/>
+  </property>
+</channel>
+EOF
+
+if command -v xfconf-query >/dev/null 2>&1; then
+  xfconf-query -c xfwm4 -p /general/theme -n -t string -s "$WM_THEME" 2>/dev/null \
+    || xfconf-query -c xfwm4 -p /general/theme -s "$WM_THEME" 2>/dev/null || true
+fi
+
+WALLPAPER_PATH="$WALLPAPER"
+if [ -f "$WALLPAPER_PATH" ]; then
+  cat > "${HOME}/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml" << EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<channel name="xfce4-desktop" version="1.0">
+  <property name="backdrop" type="empty">
+    <property name="screen0" type="empty">
+      <property name="monitor0" type="empty">
+        <property name="image-style" type="int" value="5"/>
+        <property name="last-image" type="string" value="${WALLPAPER_PATH}"/>
+        <property name="color-style" type="int" value="0"/>
+        <property name="rgba1" type="array">
+          <property name="alpha" type="double" value="1"/>
+          <property name="red" type="double" value="${DESKTOP_COLOR_R}"/>
+          <property name="green" type="double" value="${DESKTOP_COLOR_G}"/>
+          <property name="blue" type="double" value="${DESKTOP_COLOR_B}"/>
+        </property>
+      </property>
+    </property>
+  </property>
+  <property name="desktop-icons" type="empty">
+    <property name="style" type="int" value="2"/>
+    <property name="show-trash" type="bool" value="true"/>
+    <property name="show-home" type="bool" value="false"/>
+    <property name="show-filesystem" type="bool" value="false"/>
+  </property>
+</channel>
+EOF
+fi
+
+apply_panel_colors() {
+  local panel="$1"
+  local alpha="$2"
+  local r="$3"
+  local g="$4"
+  local b="$5"
+  local alpha_int
+  alpha_int="$(awk "BEGIN {printf \"%.0f\", ${alpha} * 100}")"
+  xfconf-query -c xfce4-panel -p "${panel}/background-style" -n -t int -s 1 2>/dev/null \
+    || xfconf-query -c xfce4-panel -p "${panel}/background-style" -s 1 2>/dev/null || true
+  xfconf-query -c xfce4-panel -p "${panel}/background-alpha" -n -t uint -s "$alpha_int" 2>/dev/null \
+    || xfconf-query -c xfce4-panel -p "${panel}/background-alpha" -s "$alpha_int" 2>/dev/null || true
+  xfconf-query -c xfce4-panel -p "${panel}/background-rgba" -n -t double -s "$alpha" -t double -s "$r" -t double -s "$g" -t double -s "$b" -t double -s 1.0 2>/dev/null \
+    || xfconf-query -c xfce4-panel -p "${panel}/background-rgba" -t double -s "$alpha" -t double -s "$r" -t double -s "$g" -t double -s "$b" -t double -s 1.0 2>/dev/null || true
+}
+
+if command -v xfconf-query >/dev/null 2>&1; then
+  apply_panel_colors "/panels/panel-1" "$PANEL_TOP_ALPHA" "$PANEL_TOP_COLOR_R" "$PANEL_TOP_COLOR_G" "$PANEL_TOP_COLOR_B"
+  apply_panel_colors "/panels/panel-0" "$PANEL_BOTTOM_ALPHA" "$PANEL_BOTTOM_COLOR_R" "$PANEL_BOTTOM_COLOR_G" "$PANEL_BOTTOM_COLOR_B"
+fi
+
+if command -v xfdesktop >/dev/null 2>&1; then
+  xfdesktop --reload 2>/dev/null || true
+fi
+if command -v xfce4-panel >/dev/null 2>&1; then
+  xfce4-panel -r 2>/dev/null || true
+fi
+
+echo "已应用主题: ${THEME_NAME} (${THEME_ID})"

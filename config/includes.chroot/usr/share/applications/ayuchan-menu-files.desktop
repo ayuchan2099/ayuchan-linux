@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Files
+Name[zh_CN]=文件管理
+Comment=Browse the file system
+Icon=thunar
+Exec=thunar
+Terminal=false
+Categories=AyuchanFavorite;System;FileManager;
+OnlyShowIn=XFCE;

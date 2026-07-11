@@ -1,0 +1,35 @@
+/* Ayuchan-gtk GTK4 */
+@define-color ayuchan_primary #1A3A5C;
+@define-color ayuchan_accent #2D6CDF;
+@define-color ayuchan_bg #0F1729;
+@define-color ayuchan_surface #1E293B;
+@define-color ayuchan_text #E8EDF4;
+
+window {
+  background-color: @ayuchan_bg;
+  color: @ayuchan_text;
+}
+
+headerbar {
+  background-color: @ayuchan_primary;
+  color: @ayuchan_text;
+}
+
+button {
+  background-color: @ayuchan_surface;
+  color: @ayuchan_text;
+  border-radius: 8px;
+  padding: 6px 14px;
+}
+
+button:hover,
+button.suggested-action {
+  background-color: @ayuchan_accent;
+  color: white;
+}
+
+entry {
+  background-color: @ayuchan_surface;
+  color: @ayuchan_text;
+  border-radius: 8px;
+}

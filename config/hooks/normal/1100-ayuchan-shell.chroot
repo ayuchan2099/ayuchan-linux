@@ -1,0 +1,109 @@
+#!/bin/bash
+# Ayuchan Desktop Shell — 主题、双栏、控制中心、开始菜单、安全基线
+set -e
+
+chmod 755 /usr/local/bin/ayuchan-apply-desktop-theme
+chmod 755 /usr/local/bin/ayuchan-theme-switcher
+chmod 755 /usr/local/bin/ayuchan-desktop-refresh-icons
+chmod 755 /usr/local/bin/ayuchan-desktop-setup
+chmod 755 /usr/local/bin/ayuchan-search
+chmod 755 /usr/local/bin/ayuchan-control-center
+chmod 755 /usr/local/bin/ayuchan-wallpaper-picker
+chmod 755 /usr/share/ayuchan/desktop/scripts/genmon-search.sh
+chmod 644 /usr/share/ayuchan/desktop/themes/*.conf
+chmod 644 /usr/share/ayuchan/desktop/wallpapers/*
+chmod 644 /usr/share/ayuchan/desktop/xfce4-panel.xml
+chmod 644 /usr/share/ayuchan/desktop/xfce4-keyboard-shortcuts.xml
+chmod -R a+rX /usr/share/themes/Ayuchan-gtk /usr/share/themes/Ayuchan-gtk-light
+chmod -R a+rX /usr/share/icons/Ayuchan-icons
+
+# 更新菜单缓存
+if command -v update-desktop-database >/dev/null 2>&1; then
+  update-desktop-database /usr/share/applications 2>/dev/null || true
+fi
+
+install -d /usr/share/applications
+
+cat > /usr/share/applications/ayuchan-theme-switcher.desktop << 'EOF'
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Ayuchan Theme Switcher
+Name[zh_CN]=Ayuchan 桌面风格
+Comment=Switch desktop themes
+Comment[zh_CN]=切换深色科技 / 浅色商务 / 蓝白简约三种风格
+Icon=preferences-desktop-theme
+Exec=/usr/local/bin/ayuchan-theme-switcher
+Terminal=false
+Categories=Settings;DesktopSettings;AyuchanSystem;
+Keywords=theme;desktop;style;主题;风格;
+EOF
+
+cat > /usr/share/applications/ayuchan-wallpaper-picker.desktop << 'EOF'
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Ayuchan Wallpaper
+Name[zh_CN]=Ayuchan 壁纸
+Comment=Choose seasonal wallpapers
+Comment[zh_CN]=选择季节壁纸
+Icon=preferences-desktop-wallpaper
+Exec=/usr/local/bin/ayuchan-wallpaper-picker
+Terminal=false
+Categories=Settings;AyuchanSystem;
+EOF
+
+# 应用商店归入系统工具分类
+if [ -f /usr/share/applications/ayuchan-app-store.desktop ]; then
+  grep -q 'AyuchanSystem' /usr/share/applications/ayuchan-app-store.desktop 2>/dev/null || \
+    sed -i 's/Categories=PackageManager;System;/Categories=PackageManager;System;AyuchanSystem;/' \
+      /usr/share/applications/ayuchan-app-store.desktop 2>/dev/null || true
+fi
+
+install -d /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml /etc/skel/.config/ayuchan
+cp /usr/share/ayuchan/desktop/xfce4-panel.xml \
+  /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml
+cp /usr/share/ayuchan/desktop/xfce4-keyboard-shortcuts.xml \
+  /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-keyboard-shortcuts.xml
+echo "dark-tech" > /etc/skel/.config/ayuchan/current-theme
+
+install -d /etc/xdg/autostart
+cat > /etc/xdg/autostart/ayuchan-desktop-setup.desktop << 'EOF'
+[Desktop Entry]
+Type=Application
+Name=Ayuchan Desktop Setup
+Exec=/usr/local/bin/ayuchan-desktop-setup
+OnlyShowIn=XFCE;
+Hidden=true
+NoDisplay=true
+X-GNOME-Autostart-enabled=true
+EOF
+
+# 安全基线：默认开启防火墙
+export DEBIAN_FRONTEND=noninteractive
+apt-get install -y ufw 2>/dev/null || true
+if command -v ufw >/dev/null 2>&1; then
+  ufw --force enable 2>/dev/null || true
+  ufw default deny incoming 2>/dev/null || true
+  ufw default allow outgoing 2>/dev/null || true
+fi
+
+apply_shell() {
+  local user="$1"
+  local home="/home/$user"
+  [[ -d "$home" ]] || return 0
+  install -d "$home/.config/xfce4/xfconf/xfce-perchannel-xml" "$home/.config/ayuchan"
+  cp -f /usr/share/ayuchan/desktop/xfce4-panel.xml \
+    "$home/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml"
+  cp -f /usr/share/ayuchan/desktop/xfce4-keyboard-shortcuts.xml \
+    "$home/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-keyboard-shortcuts.xml"
+  [ -f "$home/.config/ayuchan/current-theme" ] || echo "dark-tech" > "$home/.config/ayuchan/current-theme"
+  chown -R "$user:$user" "$home/.config" 2>/dev/null || true
+}
+
+apply_shell ayuchan
+
+if id ayuchan >/dev/null 2>&1 && command -v runuser >/dev/null 2>&1; then
+  install -d /home/ayuchan/Desktop
+  runuser -u ayuchan -- env HOME=/home/ayuchan /usr/local/bin/ayuchan-desktop-refresh-icons 2>/dev/null || true
+fi

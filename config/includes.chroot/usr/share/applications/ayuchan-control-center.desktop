@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Ayuchan Control Center
+Name[zh_CN]=Ayuchan 控制中心
+Comment=Network, display, sound, input, updates and security
+Comment[zh_CN]=网络、显示、声音、输入法、更新与安全统一管理
+Icon=ayuchan-control-center
+Exec=/usr/local/bin/ayuchan-control-center
+Terminal=false
+Categories=Settings;System;AyuchanFavorite;AyuchanSystem;
+Keywords=settings;control;network;security;设置;控制;网络;安全;
+OnlyShowIn=XFCE;

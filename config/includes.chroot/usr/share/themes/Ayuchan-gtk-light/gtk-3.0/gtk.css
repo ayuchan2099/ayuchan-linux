@@ -1,0 +1,16 @@
+/* Ayuchan-gtk-light */
+@define-color ayuchan_primary #1A3A5C;
+@define-color ayuchan_accent #2D6CDF;
+@define-color ayuchan_bg #F8FAFC;
+@define-color ayuchan_surface #FFFFFF;
+@define-color ayuchan_text #1E293B;
+@define-color ayuchan_text_secondary #64748B;
+
+* { font-family: "Noto Sans CJK SC", "Noto Sans", sans-serif; }
+window, dialog { background-color: @ayuchan_bg; color: @ayuchan_text; }
+headerbar, .titlebar { background-color: @ayuchan_surface; color: @ayuchan_text; border-bottom: 1px solid #E2E8F0; }
+button { background-color: @ayuchan_surface; color: @ayuchan_text; border: 1px solid #E2E8F0; border-radius: 8px; padding: 6px 14px; }
+button:hover, button:checked { background-color: @ayuchan_accent; color: white; }
+entry, combobox { background-color: white; color: @ayuchan_text; border: 1px solid #CBD5E1; border-radius: 8px; padding: 6px 10px; }
+entry:focus { border-color: @ayuchan_accent; }
+treeview:selected, list row:selected { background-color: @ayuchan_accent; color: white; }

@@ -1,0 +1,41 @@
+#!/bin/bash
+# Ayuchan Desktop — 首次登录初始化双栏 Shell
+set -euo pipefail
+
+export DISPLAY="${DISPLAY:-:0}"
+MARKER="${HOME}/.config/ayuchan/desktop-initialized"
+PANEL_SRC="/usr/share/ayuchan/desktop/xfce4-panel.xml"
+KEYS_SRC="/usr/share/ayuchan/desktop/xfce4-keyboard-shortcuts.xml"
+CONF_DIR="${HOME}/.config/xfce4/xfconf/xfce-perchannel-xml"
+
+mkdir -p "${HOME}/.config/ayuchan" "$CONF_DIR"
+
+if [ ! -f "$MARKER" ] || [ "${AYUCHAN_DESKTOP_RESET:-}" = "1" ]; then
+  [ -f "$PANEL_SRC" ] && cp -f "$PANEL_SRC" "${CONF_DIR}/xfce4-panel.xml"
+  [ -f "$KEYS_SRC" ] && cp -f "$KEYS_SRC" "${CONF_DIR}/xfce4-keyboard-shortcuts.xml"
+
+  if command -v xfconf-query >/dev/null 2>&1; then
+    for p in $(xfconf-query -c xfce4-panel -p /panels -l 2>/dev/null || true); do
+      if [ "$p" != "panel-0" ] && [ "$p" != "panel-1" ]; then
+        xfconf-query -c xfce4-panel -p "/panels/${p}" -r 2>/dev/null || true
+      fi
+    done
+  fi
+fi
+
+if [ -f "${HOME}/.config/ayuchan/current-theme" ]; then
+  /usr/local/bin/ayuchan-apply-desktop-theme
+else
+  /usr/local/bin/ayuchan-apply-desktop-theme dark-tech
+fi
+
+/usr/local/bin/ayuchan-desktop-refresh-icons
+touch "$MARKER"
+
+if command -v xfce4-panel >/dev/null 2>&1; then
+  if pgrep -x xfce4-panel >/dev/null 2>&1; then
+    xfce4-panel -r 2>/dev/null || true
+  else
+    xfce4-panel 2>/dev/null &
+  fi
+fi

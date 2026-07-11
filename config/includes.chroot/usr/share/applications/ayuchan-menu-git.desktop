@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Git
+Name[zh_CN]=Git 版本控制
+Comment=Version control system
+Icon=git
+Exec=xfce4-terminal -e git
+Terminal=false
+Categories=AyuchanDev;Development;
+OnlyShowIn=XFCE;

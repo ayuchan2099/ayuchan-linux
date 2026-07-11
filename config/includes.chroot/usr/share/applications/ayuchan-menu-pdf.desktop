@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=PDF Viewer
+Name[zh_CN]=PDF 阅读器
+Comment=View PDF documents
+Icon=application-pdf
+Exec=evince
+Terminal=false
+Categories=AyuchanOffice;Viewer;
+OnlyShowIn=XFCE;

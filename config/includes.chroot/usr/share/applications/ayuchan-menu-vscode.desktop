@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=VS Code
+Name[zh_CN]=VS Code 编辑器
+Comment=Code editor
+Icon=code
+Exec=code
+Terminal=false
+Categories=AyuchanDev;Development;IDE;
+OnlyShowIn=XFCE;

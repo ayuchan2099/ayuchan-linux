@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Menu PUBLIC "-//freedesktop//DTD Menu 1.0//EN"
+  "http://standards.freedesktop.org/menu-spec/1.0/menu.dtd">
+<Menu>
+  <Name>Ayuchan</Name>
+  <Layout>
+    <Menuname>ayuchan-favorites</Menuname>
+    <Menuname>ayuchan-office</Menuname>
+    <Menuname>ayuchan-dev</Menuname>
+    <Menuname>ayuchan-system</Menuname>
+    <Merge type="all"/>
+  </Layout>
+
+  <Menu>
+    <Name>常用应用</Name>
+    <Directory>ayuchan-favorites.directory</Directory>
+    <Include><Category>AyuchanFavorite</Category></Include>
+  </Menu>
+
+  <Menu>
+    <Name>办公</Name>
+    <Directory>ayuchan-office.directory</Directory>
+    <Include><Category>AyuchanOffice</Category></Include>
+  </Menu>
+
+  <Menu>
+    <Name>开发</Name>
+    <Directory>ayuchan-dev.directory</Directory>
+    <Include><Category>AyuchanDev</Category></Include>
+  </Menu>
+
+  <Menu>
+    <Name>系统工具</Name>
+    <Directory>ayuchan-system.directory</Directory>
+    <Include><Category>AyuchanSystem</Category></Include>
+  </Menu>
+</Menu>
