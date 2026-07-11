@@ -1,0 +1,89 @@
+#!/bin/bash
+# Ayuchan 应用商店 — 特权安装/卸载助手（需 root 运行）
+set -e
+
+export DEBIAN_FRONTEND=noninteractive
+
+log() {
+  echo "[ayuchan-app-store] $*"
+}
+
+install_apt() {
+  log "更新软件源..."
+  apt-get update -qq
+  log "安装: $*"
+  apt-get install -y "$@"
+}
+
+remove_apt() {
+  log "卸载: $*"
+  apt-get remove -y "$@"
+}
+
+install_chrome() {
+  if dpkg -l google-chrome-stable 2>/dev/null | grep -q '^ii'; then
+    log "Google Chrome 已安装"
+    return 0
+  fi
+  install -d /usr/share/keyrings
+  log "下载 Google Chrome..."
+  wget -q -O /tmp/google-chrome.deb \
+    https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+  apt-get update -qq
+  apt-get install -y /tmp/google-chrome.deb
+  rm -f /tmp/google-chrome.deb
+}
+
+install_vscode() {
+  if dpkg -l code 2>/dev/null | grep -q '^ii'; then
+    log "Visual Studio Code 已安装"
+    return 0
+  fi
+  install -d /usr/share/keyrings
+  log "配置 VS Code 软件源..."
+  wget -qO- https://packages.microsoft.com/keys/microsoft.asc \
+    | gpg --dearmor -o /usr/share/keyrings/microsoft-vscode.gpg
+  cat > /etc/apt/sources.list.d/vscode.list << 'EOF'
+deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft-vscode.gpg] https://packages.microsoft.com/repos/code stable main
+EOF
+  apt-get update -qq
+  apt-get install -y code
+}
+
+install_steam() {
+  if dpkg -l steam 2>/dev/null | grep -q '^ii'; then
+    log "Steam 已安装"
+    return 0
+  fi
+  log "启用 32 位架构支持（Steam 需要）..."
+  dpkg --add-architecture i386 2>/dev/null || true
+  apt-get update -qq
+  apt-get install -y steam
+}
+
+ACTION="${1:-}"
+shift || true
+
+case "$ACTION" in
+  install)
+    INSTALL_TYPE="${1:-apt}"
+    shift || true
+    case "$INSTALL_TYPE" in
+      chrome) install_chrome ;;
+      vscode) install_vscode ;;
+      steam)  install_steam ;;
+      apt)    install_apt "$@" ;;
+      *)      echo "未知安装类型: $INSTALL_TYPE" >&2; exit 1 ;;
+    esac
+    ;;
+  remove)
+    remove_apt "$@"
+    ;;
+  *)
+    echo "用法: $0 install [apt|chrome|vscode|steam] <packages...>" >&2
+    echo "      $0 remove <packages...>" >&2
+    exit 1
+    ;;
+esac
+
+log "完成"

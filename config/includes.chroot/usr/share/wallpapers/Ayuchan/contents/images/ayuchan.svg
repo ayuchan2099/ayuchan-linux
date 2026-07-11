@@ -21,11 +21,11 @@
 
   <rect width="3840" height="2160" fill="url(#bg)"/>
 
-  <!-- ÌoIU -->
+  <!-- ï¿½oIU -->
   <ellipse cx="1920" cy="780" rx="1100" ry="620" fill="url(#orb)"/>
   <rect x="0" y="0" width="3840" height="900" fill="url(#glow)"/>
 
-  <!-- ÅpQ< -->
+  <!-- ï¿½pQ< -->
   <g stroke="#6fa8dc" stroke-opacity="0.08" stroke-width="2">
     <line x1="0" y1="540" x2="3840" y2="540"/>
     <line x1="0" y1="1080" x2="3840" y2="1080"/>
@@ -35,14 +35,14 @@
     <line x1="2880" y1="0" x2="2880" y2="2160"/>
   </g>
 
-  <!-- Åp¯ -->
+  <!-- ï¿½pï¿½ -->
   <circle cx="1920" cy="980" r="420" fill="none" stroke="#8ec5ff" stroke-opacity="0.12" stroke-width="3"/>
   <circle cx="1920" cy="980" r="520" fill="none" stroke="#8ec5ff" stroke-opacity="0.07" stroke-width="2"/>
 
-  <!-- •èÅpa -->
+  <!-- ï¿½ï¿½ï¿½pa -->
   <rect x="1320" y="1380" width="1200" height="4" rx="2" fill="#6eb6ff" fill-opacity="0.55" filter="url(#soft)"/>
 
-  <!-- ÁL‡W -->
+  <!-- ï¿½Lï¿½W -->
   <text x="1920" y="1010" text-anchor="middle"
         font-family="DejaVu Sans, Noto Sans CJK SC, sans-serif"
         font-size="220" font-weight="700" fill="#eef4ff" letter-spacing="8">
@@ -56,6 +56,6 @@
   <text x="1920" y="1280" text-anchor="middle"
         font-family="DejaVu Sans, Noto Sans CJK SC, sans-serif"
         font-size="42" fill="#6d84b0">
-    € · °ã · :`
+    ï¿½ ï¿½ ï¿½ï¿½ ï¿½ :`
   </text>
 </svg>

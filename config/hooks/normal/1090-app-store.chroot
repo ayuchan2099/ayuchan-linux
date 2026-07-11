@@ -1,0 +1,61 @@
+#!/bin/bash
+# Ayuchan 应用商店：桌面入口、权限与快捷方式
+set -e
+
+chmod 755 /usr/local/bin/ayuchan-app-store
+chmod 755 /usr/local/bin/ayuchan-app-store-privileged
+chmod 644 /usr/share/ayuchan/app-store/catalog.json
+
+install -d /etc/sudoers.d
+cat > /etc/sudoers.d/ayuchan-app-store << 'EOF'
+Defaults:ayuchan !requiretty
+ayuchan ALL=(ALL) NOPASSWD: /usr/local/bin/ayuchan-app-store-privileged
+EOF
+chmod 440 /etc/sudoers.d/ayuchan-app-store
+
+install -d /usr/share/applications
+
+cat > /usr/share/applications/ayuchan-app-store.desktop << 'EOF'
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Ayuchan App Store
+Name[zh_CN]=Ayuchan 应用商店
+Comment=Browse and install applications
+Comment[zh_CN]=浏览并安装常用应用程序
+Icon=system-software-install
+Exec=/usr/local/bin/ayuchan-app-store
+Terminal=false
+Categories=PackageManager;System;
+StartupNotify=true
+Keywords=store;software;install;应用;商店;软件;
+EOF
+
+for desk in /etc/skel/Desktop /home/ayuchan/Desktop; do
+  install -d "$desk"
+  cp /usr/share/applications/ayuchan-app-store.desktop "$desk/Ayuchan App Store.desktop"
+  chmod +x "$desk/Ayuchan App Store.desktop"
+done
+
+if id ayuchan >/dev/null 2>&1; then
+  chown -R ayuchan:ayuchan /home/ayuchan/Desktop 2>/dev/null || true
+fi
+
+# 将应用商店加入 XFCE 面板快速启动（新用户默认配置）
+mkdir -p /etc/skel/.config/xfce4/panel
+cat > /etc/skel/.config/xfce4/panel/ayuchan-app-store.desktop << 'EOF'
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Ayuchan App Store
+Name[zh_CN]=应用商店
+Icon=system-software-install
+Exec=/usr/local/bin/ayuchan-app-store
+EOF
+
+if [ -d /home/ayuchan ]; then
+  mkdir -p /home/ayuchan/.config/xfce4/panel
+  cp /etc/skel/.config/xfce4/panel/ayuchan-app-store.desktop \
+    /home/ayuchan/.config/xfce4/panel/ayuchan-app-store.desktop 2>/dev/null || true
+  chown -R ayuchan:ayuchan /home/ayuchan/.config/xfce4/panel 2>/dev/null || true
+fi

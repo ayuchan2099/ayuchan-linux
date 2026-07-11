@@ -1,0 +1,610 @@
+{
+  "version": 2,
+  "categories": [
+    {
+      "id": "office",
+      "name": "办公",
+      "apps": [
+        {
+          "id": "libreoffice",
+          "name": "LibreOffice",
+          "description": "免费开源办公套件，包含文字处理、电子表格和演示文稿。",
+          "packages": ["libreoffice"],
+          "icon": "libreoffice-writer"
+        },
+        {
+          "id": "libreoffice-lang-zh",
+          "name": "LibreOffice 中文语言包",
+          "description": "为 LibreOffice 添加简体中文界面与拼写检查支持。",
+          "packages": ["libreoffice-l10n-zh-cn", "libreoffice-help-zh-cn"],
+          "icon": "libreoffice-writer"
+        },
+        {
+          "id": "thunderbird",
+          "name": "Thunderbird 邮件",
+          "description": "Mozilla 出品的邮件与日历客户端，支持多账号管理。",
+          "packages": ["thunderbird"],
+          "icon": "thunderbird"
+        },
+        {
+          "id": "calibre",
+          "name": "Calibre 电子书",
+          "description": "电子书管理与格式转换工具，支持 Kindle、EPUB 等格式。",
+          "packages": ["calibre"],
+          "icon": "calibre"
+        },
+        {
+          "id": "cherrytree",
+          "name": "CherryTree 笔记",
+          "description": "层级式笔记软件，支持富文本、代码块与加密。",
+          "packages": ["cherrytree"],
+          "icon": "cherrytree"
+        },
+        {
+          "id": "gnote",
+          "name": "Gnote",
+          "description": "轻量级笔记应用，适合快速记录想法和待办事项。",
+          "packages": ["gnote"],
+          "icon": "accessories-text-editor"
+        },
+        {
+          "id": "pdfarranger",
+          "name": "PDF Arranger",
+          "description": "PDF 合并、拆分与重排工具，处理文档非常方便。",
+          "packages": ["pdfarranger"],
+          "icon": "application-pdf"
+        },
+        {
+          "id": "scribus",
+          "name": "Scribus 排版",
+          "description": "专业桌面出版软件，适合制作宣传册、杂志与海报。",
+          "packages": ["scribus"],
+          "icon": "scribus"
+        }
+      ]
+    },
+    {
+      "id": "dev",
+      "name": "开发",
+      "apps": [
+        {
+          "id": "vscode",
+          "name": "Visual Studio Code",
+          "description": "微软出品的代码编辑器，支持丰富插件与 Git 集成。",
+          "packages": ["code"],
+          "icon": "code",
+          "install_type": "vscode"
+        },
+        {
+          "id": "build-essential",
+          "name": "编译工具链",
+          "description": "GCC、Make 等基础开发工具，编译 C/C++ 项目必备。",
+          "packages": ["build-essential"],
+          "icon": "applications-engineering"
+        },
+        {
+          "id": "python3-dev",
+          "name": "Python 开发环境",
+          "description": "Python 3 解释器及 pip、venv 等常用开发组件。",
+          "packages": ["python3", "python3-pip", "python3-venv"],
+          "icon": "text-x-python"
+        },
+        {
+          "id": "nodejs",
+          "name": "Node.js",
+          "description": "JavaScript 运行时，适合前端与脚本开发。",
+          "packages": ["nodejs", "npm"],
+          "icon": "text-x-script"
+        },
+        {
+          "id": "openjdk",
+          "name": "OpenJDK 17",
+          "description": "Java 开发工具包，运行与开发 Java 应用程序。",
+          "packages": ["openjdk-17-jdk"],
+          "icon": "java"
+        },
+        {
+          "id": "git-gui",
+          "name": "Git 图形工具",
+          "description": "Git 版本控制及可视化提交历史工具 Gitg。",
+          "packages": ["git", "gitg"],
+          "icon": "gitg"
+        },
+        {
+          "id": "neovim",
+          "name": "Neovim",
+          "description": "现代化的 Vim 编辑器，插件生态丰富，适合终端开发。",
+          "packages": ["neovim"],
+          "icon": "nvim"
+        },
+        {
+          "id": "cmake",
+          "name": "CMake",
+          "description": "跨平台构建系统，C/C++ 项目自动化编译必备。",
+          "packages": ["cmake", "cmake-curses-gui"],
+          "icon": "cmake"
+        },
+        {
+          "id": "docker",
+          "name": "Docker",
+          "description": "容器化平台，快速部署与运行隔离的应用环境。",
+          "packages": ["docker.io"],
+          "icon": "docker"
+        }
+      ]
+    },
+    {
+      "id": "media",
+      "name": "多媒体",
+      "apps": [
+        {
+          "id": "vlc",
+          "name": "VLC 媒体播放器",
+          "description": "万能影音播放器，支持几乎所有常见音视频格式。",
+          "packages": ["vlc"],
+          "icon": "vlc"
+        },
+        {
+          "id": "mpv",
+          "name": "MPV 播放器",
+          "description": "轻量高性能视频播放器，界面简洁、占用资源少。",
+          "packages": ["mpv"],
+          "icon": "mpv"
+        },
+        {
+          "id": "gimp",
+          "name": "GIMP",
+          "description": "专业级图像编辑软件，被誉为 Linux 上的 Photoshop。",
+          "packages": ["gimp"],
+          "icon": "gimp"
+        },
+        {
+          "id": "inkscape",
+          "name": "Inkscape",
+          "description": "矢量图形编辑器，适合绘制 Logo、插画与图标。",
+          "packages": ["inkscape"],
+          "icon": "inkscape"
+        },
+        {
+          "id": "audacity",
+          "name": "Audacity",
+          "description": "开源音频编辑与录音软件，支持多轨混音。",
+          "packages": ["audacity"],
+          "icon": "audacity"
+        },
+        {
+          "id": "kdenlive",
+          "name": "Kdenlive 视频剪辑",
+          "description": "专业非线性视频编辑器，支持多轨剪辑与特效。",
+          "packages": ["kdenlive"],
+          "icon": "kdenlive"
+        },
+        {
+          "id": "obs-studio",
+          "name": "OBS Studio",
+          "description": "直播与录屏工具，适合游戏直播和在线教学。",
+          "packages": ["obs-studio"],
+          "icon": "obs"
+        },
+        {
+          "id": "simplescreenrecorder",
+          "name": "SimpleScreenRecorder",
+          "description": "简单易用的屏幕录制工具，支持选区录制。",
+          "packages": ["simplescreenrecorder"],
+          "icon": "simplescreenrecorder"
+        },
+        {
+          "id": "rhythmbox",
+          "name": "Rhythmbox 音乐",
+          "description": "GNOME 音乐播放器，支持本地曲库与在线电台。",
+          "packages": ["rhythmbox"],
+          "icon": "rhythmbox"
+        },
+        {
+          "id": "strawberry",
+          "name": "Strawberry 音乐",
+          "description": "功能丰富的音乐播放器，支持歌词与封面显示。",
+          "packages": ["strawberry"],
+          "icon": "strawberry"
+        },
+        {
+          "id": "shotwell",
+          "name": "Shotwell 相册",
+          "description": "照片管理与浏览工具，支持导入、标签与简单编辑。",
+          "packages": ["shotwell"],
+          "icon": "shotwell"
+        },
+        {
+          "id": "flameshot",
+          "name": "Flameshot 截图",
+          "description": "功能强大的截图工具，支持标注、箭头和文字说明。",
+          "packages": ["flameshot"],
+          "icon": "flameshot"
+        }
+      ]
+    },
+    {
+      "id": "network",
+      "name": "网络",
+      "apps": [
+        {
+          "id": "google-chrome",
+          "name": "Google Chrome",
+          "description": "Google 出品的 Chromium 内核浏览器，兼容性好。",
+          "packages": ["google-chrome-stable"],
+          "icon": "google-chrome",
+          "install_type": "chrome"
+        },
+        {
+          "id": "chromium",
+          "name": "Chromium",
+          "description": "开源浏览器，Chrome 的上游版本。",
+          "packages": ["chromium"],
+          "icon": "chromium-browser"
+        },
+        {
+          "id": "firefox-l10n-zh",
+          "name": "Firefox 中文语言包",
+          "description": "为系统自带的 Firefox ESR 添加简体中文界面。",
+          "packages": ["firefox-esr-l10n-zh-cn"],
+          "icon": "firefox"
+        },
+        {
+          "id": "filezilla",
+          "name": "FileZilla",
+          "description": "FTP/SFTP 文件传输客户端，网站运维常用工具。",
+          "packages": ["filezilla"],
+          "icon": "filezilla"
+        },
+        {
+          "id": "qbittorrent",
+          "name": "qBittorrent",
+          "description": "功能完善的 BT 下载客户端，支持磁力链接与 RSS。",
+          "packages": ["qbittorrent"],
+          "icon": "qbittorrent"
+        },
+        {
+          "id": "transmission",
+          "name": "Transmission",
+          "description": "轻量级 BT 下载客户端，界面简洁易用。",
+          "packages": ["transmission-gtk"],
+          "icon": "transmission"
+        },
+        {
+          "id": "remmina",
+          "name": "Remmina",
+          "description": "远程桌面客户端，支持 RDP、VNC、SSH 等协议。",
+          "packages": ["remmina"],
+          "icon": "remmina"
+        },
+        {
+          "id": "telegram",
+          "name": "Telegram",
+          "description": "流行的即时通讯软件，支持群组、频道与文件传输。",
+          "packages": ["telegram-desktop"],
+          "icon": "telegram"
+        },
+        {
+          "id": "hexchat",
+          "name": "HexChat",
+          "description": "IRC 聊天客户端，适合技术社区与开源项目交流。",
+          "packages": ["hexchat"],
+          "icon": "hexchat"
+        }
+      ]
+    },
+    {
+      "id": "tools",
+      "name": "工具",
+      "apps": [
+        {
+          "id": "gparted",
+          "name": "GParted",
+          "description": "磁盘分区管理工具，可视化调整分区大小与格式。",
+          "packages": ["gparted"],
+          "icon": "gparted"
+        },
+        {
+          "id": "baobab",
+          "name": "磁盘用量分析",
+          "description": "可视化查看磁盘空间占用，快速定位大文件。",
+          "packages": ["baobab"],
+          "icon": "baobab"
+        },
+        {
+          "id": "htop",
+          "name": "htop",
+          "description": "交互式系统进程监视器，比 top 更直观。",
+          "packages": ["htop"],
+          "icon": "utilities-system-monitor"
+        },
+        {
+          "id": "hardinfo",
+          "name": "Hardinfo 硬件信息",
+          "description": "查看 CPU、内存、显卡等硬件详情与性能基准。",
+          "packages": ["hardinfo"],
+          "icon": "hardinfo"
+        },
+        {
+          "id": "keepassxc",
+          "name": "KeePassXC",
+          "description": "开源密码管理器，安全存储账号与密码。",
+          "packages": ["keepassxc"],
+          "icon": "keepassxc"
+        },
+        {
+          "id": "bleachbit",
+          "name": "BleachBit",
+          "description": "系统清理工具，释放磁盘空间并保护隐私。",
+          "packages": ["bleachbit"],
+          "icon": "bleachbit"
+        },
+        {
+          "id": "copyq",
+          "name": "CopyQ 剪贴板",
+          "description": "高级剪贴板管理器，保存历史记录并支持快速搜索。",
+          "packages": ["copyq"],
+          "icon": "copyq"
+        },
+        {
+          "id": "gdebi",
+          "name": "GDebi 安装器",
+          "description": "图形化 .deb 包安装工具，自动解决依赖关系。",
+          "packages": ["gdebi"],
+          "icon": "gdebi"
+        },
+        {
+          "id": "synaptic",
+          "name": "Synaptic 包管理器",
+          "description": "高级软件包管理器，可搜索安装 Debian 仓库中的全部软件。",
+          "packages": ["synaptic"],
+          "icon": "synaptic"
+        },
+        {
+          "id": "timeshift",
+          "name": "Timeshift 系统备份",
+          "description": "系统快照备份与还原工具，类似 Windows 系统还原点。",
+          "packages": ["timeshift"],
+          "icon": "timeshift"
+        },
+        {
+          "id": "neofetch",
+          "name": "Neofetch",
+          "description": "在终端显示系统信息，美观展示发行版与硬件配置。",
+          "packages": ["neofetch"],
+          "icon": "utilities-terminal"
+        }
+      ]
+    },
+    {
+      "id": "games",
+      "name": "游戏",
+      "apps": [
+        {
+          "id": "steam",
+          "name": "Steam（游戏平台）",
+          "description": "全球最大 PC 游戏平台，需启用 non-free 源后安装。",
+          "packages": ["steam"],
+          "icon": "steam",
+          "install_type": "steam"
+        },
+        {
+          "id": "lutris",
+          "name": "Lutris 游戏启动器",
+          "description": "统一管理 Linux 原生、Wine 与模拟器游戏。",
+          "packages": ["lutris"],
+          "icon": "lutris"
+        },
+        {
+          "id": "supertuxkart",
+          "name": "SuperTuxKart 卡丁车",
+          "description": "卡通风格卡丁车竞速游戏，支持多人对战。",
+          "packages": ["supertuxkart"],
+          "icon": "supertuxkart"
+        },
+        {
+          "id": "0ad",
+          "name": "0 A.D. 帝国崛起",
+          "description": "开源即时战略游戏，以古希腊罗马时代为背景。",
+          "packages": ["0ad"],
+          "icon": "0ad"
+        },
+        {
+          "id": "wesnoth",
+          "name": "Battle for Wesnoth",
+          "description": "经典回合制策略游戏，拥有丰富的战役与 MOD。",
+          "packages": ["wesnoth"],
+          "icon": "wesnoth"
+        },
+        {
+          "id": "minetest",
+          "name": "Minetest 沙盒",
+          "description": "开源 voxel 沙盒游戏，类似 Minecraft，支持联机。",
+          "packages": ["minetest"],
+          "icon": "minetest"
+        },
+        {
+          "id": "openttd",
+          "name": "OpenTTD 运输大亨",
+          "description": "经典模拟经营游戏，建设铁路、公路与航空运输网络。",
+          "packages": ["openttd"],
+          "icon": "openttd"
+        },
+        {
+          "id": "hedgewars",
+          "name": "Hedgewars 刺猬战争",
+          "description": "回合制炮兵对战游戏，类似 worms，支持在线多人。",
+          "packages": ["hedgewars"],
+          "icon": "hedgewars"
+        },
+        {
+          "id": "openarena",
+          "name": "OpenArena",
+          "description": "开源第一人称射击游戏，快节奏竞技场对战。",
+          "packages": ["openarena"],
+          "icon": "openarena"
+        },
+        {
+          "id": "teeworlds",
+          "name": "Teeworlds",
+          "description": "2D 多人射击平台游戏，操作轻快、联机有趣。",
+          "packages": ["teeworlds"],
+          "icon": "teeworlds"
+        },
+        {
+          "id": "warzone2100",
+          "name": "Warzone 2100",
+          "description": "3D 即时战略游戏，支持战役模式与多人联机。",
+          "packages": ["warzone2100"],
+          "icon": "warzone2100"
+        },
+        {
+          "id": "chocolate-doom",
+          "name": "Chocolate Doom",
+          "description": "经典 DOOM 射击游戏的开源复刻版，怀旧必备。",
+          "packages": ["chocolate-doom"],
+          "icon": "doom"
+        },
+        {
+          "id": "armagetronad",
+          "name": "Armagetron Advanced",
+          "description": "霓虹光轮竞速对战游戏，灵感来自电影《创：战纪》。",
+          "packages": ["armagetronad"],
+          "icon": "armagetronad"
+        },
+        {
+          "id": "extreme-tux-racer",
+          "name": "Extreme Tux Racer",
+          "description": "Tux 企鹅滑雪竞速游戏，沿山坡滑行收集鱼。",
+          "packages": ["extreme-tux-racer"],
+          "icon": "extreme-tux-racer"
+        },
+        {
+          "id": "supertux",
+          "name": "SuperTux",
+          "description": "经典横版平台跳跃游戏，Linux 企鹅 Tux 为主角。",
+          "packages": ["supertux"],
+          "icon": "supertux"
+        },
+        {
+          "id": "frozen-bubble",
+          "name": "Frozen Bubble",
+          "description": "泡泡龙式休闲益智游戏，适合放松心情。",
+          "packages": ["frozen-bubble"],
+          "icon": "frozen-bubble"
+        },
+        {
+          "id": "widelands",
+          "name": "Widelands",
+          "description": "经济模拟与即时战略游戏，建设部落、采集资源。",
+          "packages": ["widelands"],
+          "icon": "widelands"
+        },
+        {
+          "id": "freedroidrpg",
+          "name": "FreedroidRPG",
+          "description": "动作角色扮演游戏，在科幻世界中对抗机器人。",
+          "packages": ["freedroidrpg"],
+          "icon": "freedroidrpg"
+        },
+        {
+          "id": "pingus",
+          "name": "Pingus",
+          "description": "益智闯关游戏，引导企鹅到达出口，类似 Lemmings。",
+          "packages": ["pingus"],
+          "icon": "pingus"
+        },
+        {
+          "id": "aisleriot",
+          "name": "Aisleriot 纸牌",
+          "description": "经典纸牌游戏合集，包含空当接龙、蜘蛛纸牌等。",
+          "packages": ["aisleriot"],
+          "icon": "aisleriot"
+        },
+        {
+          "id": "gnome-mahjongg",
+          "name": "麻将连连看",
+          "description": "经典麻将配对消除游戏，考验观察力与记忆力。",
+          "packages": ["gnome-mahjongg"],
+          "icon": "gnome-mahjongg"
+        },
+        {
+          "id": "gnome-chess",
+          "name": "国际象棋",
+          "description": "3D 国际象棋游戏，支持人机对战与难度调节。",
+          "packages": ["gnome-chess"],
+          "icon": "gnome-chess"
+        },
+        {
+          "id": "gnome-sudoku",
+          "name": "数独",
+          "description": "经典数独益智游戏，多种难度供选择。",
+          "packages": ["gnome-sudoku"],
+          "icon": "gnome-sudoku"
+        },
+        {
+          "id": "quadrapassel",
+          "name": "Quadrapassel 俄罗斯方块",
+          "description": "俄罗斯方块风格益智游戏，消除方块得分。",
+          "packages": ["quadrapassel"],
+          "icon": "quadrapassel"
+        },
+        {
+          "id": "gnome-mines",
+          "name": "扫雷",
+          "description": "经典扫雷游戏，三种难度挑战逻辑推理能力。",
+          "packages": ["gnome-mines"],
+          "icon": "gnome-mines"
+        },
+        {
+          "id": "five-or-more",
+          "name": "五子连珠",
+          "description": "消除类益智游戏，将五个同色球连成一线即可消除。",
+          "packages": ["five-or-more"],
+          "icon": "five-or-more"
+        },
+        {
+          "id": "neverball",
+          "name": "Neverball",
+          "description": "滚球平衡益智游戏，倾斜地板引导球体到达终点。",
+          "packages": ["neverball"],
+          "icon": "neverball"
+        },
+        {
+          "id": "gcompris",
+          "name": "GCompris 儿童教育",
+          "description": "儿童教育游戏套件，涵盖数学、字母、逻辑等趣味活动。",
+          "packages": ["gcompris-qt"],
+          "icon": "gcompris"
+        }
+      ]
+    },
+    {
+      "id": "education",
+      "name": "教育",
+      "apps": [
+        {
+          "id": "stellarium",
+          "name": "Stellarium 星空",
+          "description": "虚拟天文馆软件，实时模拟夜空星象与星座。",
+          "packages": ["stellarium"],
+          "icon": "stellarium"
+        },
+        {
+          "id": "geogebra",
+          "name": "GeoGebra",
+          "description": "交互式数学软件，支持几何、代数与函数可视化。",
+          "packages": ["geogebra"],
+          "icon": "geogebra"
+        },
+        {
+          "id": "kalzium",
+          "name": "Kalzium 化学元素",
+          "description": "化学元素周期表工具，查看元素性质与反应信息。",
+          "packages": ["kalzium"],
+          "icon": "kalzium"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,282 @@
+#!/bin/bash
+# Ayuchan 应用商店 — 图形化软件安装中心
+set -euo pipefail
+
+CATALOG="/usr/share/ayuchan/app-store/catalog.json"
+PRIV="/usr/local/bin/ayuchan-app-store-privileged"
+TITLE="Ayuchan 应用商店"
+
+export DISPLAY="${DISPLAY:-:0}"
+
+if [ ! -f "$CATALOG" ]; then
+  zenity --error --title="$TITLE" --text="未找到软件目录: $CATALOG" 2>/dev/null
+  exit 1
+fi
+
+if ! command -v python3 >/dev/null 2>&1; then
+  zenity --error --title="$TITLE" --text="需要 python3 才能运行应用商店。" 2>/dev/null
+  exit 1
+fi
+
+run_privileged() {
+  local logfile
+  logfile="$(mktemp /tmp/ayuchan-app-store.XXXXXX.log)"
+  if sudo -n "$PRIV" "$@" >"$logfile" 2>&1; then
+    rm -f "$logfile"
+    return 0
+  fi
+  if pkexec "$PRIV" "$@" >"$logfile" 2>&1; then
+    rm -f "$logfile"
+    return 0
+  fi
+  zenity --error --title="$TITLE" --width=480 --text="操作失败，请查看日志:\n$logfile\n\n$(tail -8 "$logfile" 2>/dev/null || true)" 2>/dev/null
+  return 1
+}
+
+do_install() {
+  local install_type="$1"
+  shift
+  local pkgs=("$@")
+  (
+    echo 10
+    echo "# 正在安装..."
+    if ! run_privileged install "$install_type" "${pkgs[@]}"; then
+      exit 1
+    fi
+    echo 100
+    echo "# 安装完成"
+  ) | zenity --progress --title="$TITLE" --percentage=0 --auto-close --no-cancel 2>/dev/null \
+    || run_privileged install "$install_type" "${pkgs[@]}"
+}
+
+do_remove() {
+  local pkgs=("$@")
+  (
+    echo 10
+    echo "# 正在卸载..."
+    if ! run_privileged remove "${pkgs[@]}"; then
+      exit 1
+    fi
+    echo 100
+    echo "# 卸载完成"
+  ) | zenity --progress --title="$TITLE" --percentage=0 --auto-close --no-cancel 2>/dev/null \
+    || run_privileged remove "${pkgs[@]}"
+}
+
+show_app_detail() {
+  local cat_id="$1"
+  local app_id="$2"
+
+  local detail
+  detail="$(python3 - "$CATALOG" "$cat_id" "$app_id" << 'PY'
+import json, subprocess, sys
+
+catalog_path, cat_id, app_id = sys.argv[1:4]
+with open(catalog_path, encoding="utf-8") as f:
+    data = json.load(f)
+
+app = None
+for cat in data["categories"]:
+    if cat["id"] != cat_id:
+        continue
+    for item in cat["apps"]:
+        if item["id"] == app_id:
+            app = item
+            break
+
+if not app:
+    sys.exit(1)
+
+def installed(pkgs):
+    for pkg in pkgs:
+        r = subprocess.run(["dpkg", "-l", pkg], capture_output=True, text=True)
+        ok = False
+        for line in r.stdout.splitlines():
+            if line.startswith("ii ") and pkg in line.split():
+                ok = True
+                break
+        if not ok:
+            return False
+    return True
+
+pkgs = app.get("packages", [])
+inst = installed(pkgs)
+install_type = app.get("install_type", "apt")
+pkg_str = " ".join(pkgs)
+
+print(f"{app['name']}")
+print(f"__DESC__{app['description']}")
+print(f"__STATUS__{'installed' if inst else 'not_installed'}")
+print(f"__TYPE__{install_type}")
+print(f"__PKGS__{pkg_str}")
+PY
+)"
+
+  local name desc status install_type pkgs
+  name="$(echo "$detail" | head -1)"
+  desc="$(echo "$detail" | grep '^__DESC__' | sed 's/^__DESC__//')"
+  status="$(echo "$detail" | grep '^__STATUS__' | sed 's/^__STATUS__//')"
+  install_type="$(echo "$detail" | grep '^__TYPE__' | sed 's/^__TYPE__//')"
+  pkgs="$(echo "$detail" | grep '^__PKGS__' | sed 's/^__PKGS__//')"
+
+  local status_text action_text
+  if [ "$status" = "installed" ]; then
+    status_text="状态: 已安装 ✓"
+    action_text="卸载"
+  else
+    status_text="状态: 未安装"
+    action_text="安装"
+  fi
+
+  local choice
+  choice="$(zenity --list --title="$TITLE — $name" --width=520 --height=360 \
+    --text="$desc\n\n$status_text\n软件包: $pkgs" \
+    --column="操作" --column="说明" \
+    "$action_text" "${action_text}此应用" \
+    "返回" "回到应用列表" \
+    "刷新" "重新检查安装状态" 2>/dev/null)" || return 0
+
+  case "$choice" in
+    安装)
+      if do_install "$install_type" $pkgs; then
+        zenity --info --title="$TITLE" --text="$name 安装成功！" 2>/dev/null
+      fi
+      show_app_detail "$cat_id" "$app_id"
+      ;;
+    卸载)
+      if zenity --question --title="$TITLE" --text="确定要卸载 $name 吗？" 2>/dev/null; then
+        if do_remove $pkgs; then
+          zenity --info --title="$TITLE" --text="$name 已卸载。" 2>/dev/null
+        fi
+      fi
+      show_app_detail "$cat_id" "$app_id"
+      ;;
+    刷新)
+      show_app_detail "$cat_id" "$app_id"
+      ;;
+    *)
+      return 0
+      ;;
+  esac
+}
+
+show_category() {
+  local cat_id="$1"
+  local cat_name="$2"
+
+  while true; do
+    local listing
+    listing="$(python3 - "$CATALOG" "$cat_id" << 'PY'
+import json, subprocess, sys
+
+with open(sys.argv[1], encoding="utf-8") as f:
+    data = json.load(f)
+
+for cat in data["categories"]:
+    if cat["id"] != sys.argv[2]:
+        continue
+    for app in cat["apps"]:
+        pkgs = app.get("packages", [])
+        installed = True
+        for pkg in pkgs:
+            r = subprocess.run(["dpkg", "-l", pkg], capture_output=True, text=True)
+            ok = False
+            for line in r.stdout.splitlines():
+                if line.startswith("ii ") and pkg in line.split():
+                    ok = True
+                    break
+            if not ok:
+                installed = False
+                break
+        status = "已安装" if installed else "未安装"
+        print(f"{app['id']}\t{app['name']}\t{status}\t{app['description'][:40]}")
+    break
+PY
+)"
+
+    if [ -z "$listing" ]; then
+      zenity --warning --title="$TITLE" --text="该分类暂无应用。" 2>/dev/null
+      return
+    fi
+
+    local selection
+    selection="$(echo "$listing" | zenity --list --title="$TITLE — $cat_name" \
+      --width=640 --height=420 \
+      --text="选择要查看或安装的应用:" \
+      --column="ID" --column="应用" --column="状态" --column="简介" \
+      --hide-column=1 2>/dev/null)" || return
+
+    local app_id="${selection%%|*}"
+    show_app_detail "$cat_id" "$app_id"
+  done
+}
+
+main_menu() {
+  while true; do
+    local categories
+    categories="$(python3 - "$CATALOG" << 'PY'
+import json, sys
+with open(sys.argv[1], encoding="utf-8") as f:
+    data = json.load(f)
+for cat in data["categories"]:
+    count = len(cat["apps"])
+    print(f"{cat['id']}\t{cat['name']}\t{count} 个应用")
+PY
+)"
+
+    local selection
+    selection="$(echo -e "搜索\t搜索已安装应用\n${categories}" | zenity --list \
+      --title="$TITLE" --width=480 --height=400 \
+      --text="欢迎使用 Ayuchan 应用商店\n浏览分类，一键安装常用软件。" \
+      --column="ID" --column="分类" --column="说明" \
+      --hide-column=1 2>/dev/null)" || exit 0
+
+    local choice_id="${selection%%|*}"
+    local choice_name
+    choice_name="$(echo "$selection" | cut -d'|' -f2)"
+
+    if [ "$choice_id" = "搜索" ]; then
+      show_search
+    else
+      show_category "$choice_id" "$choice_name"
+    fi
+  done
+}
+
+show_search() {
+  local installed_list
+  installed_list="$(python3 - "$CATALOG" << 'PY'
+import json, subprocess, sys
+with open(sys.argv[1], encoding="utf-8") as f:
+    data = json.load(f)
+for cat in data["categories"]:
+    for app in cat["apps"]:
+        pkgs = app.get("packages", [])
+        ok = True
+        for pkg in pkgs:
+            r = subprocess.run(["dpkg", "-l", pkg], capture_output=True, text=True)
+            found = False
+            for line in r.stdout.splitlines():
+                if line.startswith("ii ") and pkg in line.split():
+                    found = True
+                    break
+            if not found:
+                ok = False
+                break
+        if ok:
+            print(f"{cat['name']}\t{app['name']}\t{' '.join(pkgs)}")
+PY
+)"
+
+  if [ -z "$installed_list" ]; then
+    zenity --info --title="$TITLE" --text="当前没有通过应用商店目录安装的软件。\n您可以从分类中浏览并安装应用。" 2>/dev/null
+    return
+  fi
+
+  zenity --list --title="$TITLE — 已安装应用" --width=560 --height=360 \
+    --text="以下应用已安装到系统中:" \
+    --column="分类" --column="应用" --column="软件包" \
+    <<< "$installed_list" 2>/dev/null || true
+}
+
+main_menu

@@ -1,0 +1,141 @@
+#!/bin/bash
+# Ayuchan Linux — 根据安装方案调整目标系统软件包
+set -euo pipefail
+
+PROFILE="${1:-full}"
+export DEBIAN_FRONTEND=noninteractive
+LOG_TAG="[ayuchan-install-profile]"
+
+log() { echo "$LOG_TAG $*"; }
+
+has_network() {
+  ping -c1 -W3 deb.debian.org >/dev/null 2>&1 \
+    || ping -c1 -W3 1.1.1.1 >/dev/null 2>&1
+}
+
+apt_update() {
+  log "更新软件源..."
+  apt-get update -qq
+}
+
+apt_install() {
+  local pkgs=("$@")
+  [ "${#pkgs[@]}" -gt 0 ] || return 0
+  log "安装: ${pkgs[*]}"
+  apt-get install -y --no-install-recommends "${pkgs[@]}"
+}
+
+apt_remove() {
+  local pkgs=("$@")
+  [ "${#pkgs[@]}" -gt 0 ] || return 0
+  log "移除: ${pkgs[*]}"
+  apt-get remove -y --purge "${pkgs[@]}" || true
+}
+
+apt_cleanup() {
+  log "清理无用依赖..."
+  apt-get autoremove -y || true
+  apt-get autoclean -y || true
+}
+
+# 最大化安装：在 Live 镜像基础上追加常用软件
+profile_full() {
+  apt_install \
+    libreoffice libreoffice-l10n-zh-cn \
+    vlc gimp inkscape audacity \
+    htop gparted synaptic baobab \
+    keepassxc flameshot copyq gdebi \
+    qbittorrent remmina filezilla \
+    telegram-desktop calibre thunderbird \
+    pdfarranger cherrytree \
+    build-essential neofetch
+}
+
+# 最小化安装：仅保留核心桌面
+profile_minimal() {
+  apt_remove \
+    google-chrome-stable code \
+    xfce4-goodies \
+    pavucontrol evince file-roller \
+    debian-installer-launcher
+}
+
+# 开发安装：桌面 + 开发工具链
+profile_dev() {
+  apt_install \
+    build-essential cmake cmake-curses-gui \
+    python3 python3-pip python3-venv \
+    nodejs npm \
+    openjdk-17-jdk \
+    neovim git gitg \
+    docker.io \
+    htop neofetch
+}
+
+# 办公安装：桌面 + 办公套件
+profile_office() {
+  apt_install \
+    libreoffice libreoffice-l10n-zh-cn libreoffice-help-zh-cn \
+    thunderbird calibre cherrytree gnote \
+    pdfarranger scribus \
+    flameshot
+}
+
+# 无桌面安装：移除图形界面，保留命令行系统
+profile_no_desktop() {
+  log "禁用图形登录..."
+  systemctl disable lightdm.service 2>/dev/null || true
+  systemctl mask lightdm.service 2>/dev/null || true
+  systemctl set-default multi-user.target 2>/dev/null || true
+
+  apt_remove \
+    xfce4 xfce4-goodies xfce4-terminal \
+    lightdm lightdm-gtk-greeter \
+    network-manager-gnome thunar mousepad \
+    firefox-esr pavucontrol evince file-roller \
+    xserver-xorg xserver-xorg-video-all xserver-xorg-input-all \
+    x11-utils x11-xserver-utils \
+    fcitx5 fcitx5-chinese-addons fcitx5-config-qt \
+    fcitx5-frontend-gtk3 fcitx5-frontend-qt6 im-config \
+    google-chrome-stable code \
+    calamares calamares-settings-debian \
+    zenity synaptic
+
+  log "已切换为无桌面（多用户）模式"
+}
+
+log "应用安装方案: $PROFILE"
+
+case "$PROFILE" in
+  full|dev|office)
+    if has_network; then
+      apt_update
+      case "$PROFILE" in
+        full)   profile_full ;;
+        dev)    profile_dev ;;
+        office) profile_office ;;
+      esac
+      apt_cleanup
+    else
+      log "未检测到网络，跳过在线软件包安装（将保留 Live 镜像中的基础系统）"
+    fi
+    ;;
+  minimal|no-desktop)
+    apt_update || true
+    case "$PROFILE" in
+      minimal)     profile_minimal ;;
+      no-desktop)  profile_no_desktop ;;
+    esac
+    apt_cleanup
+    ;;
+  *)
+    log "未知方案 '$PROFILE'，回退到最大化安装"
+    if has_network; then
+      apt_update
+      profile_full
+      apt_cleanup
+    fi
+    ;;
+esac
+
+log "安装方案 $PROFILE 已应用"

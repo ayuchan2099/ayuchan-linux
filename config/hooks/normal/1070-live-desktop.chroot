@@ -31,6 +31,7 @@ cat > /usr/local/bin/ayuchan-rescue << 'EOF'
 echo "Ayuchan Linux 救援命令:"
 echo "  ayuchan-install-gui        图形安装 Calamares"
 echo "  ayuchan-install-text       文本安装 Debian Installer"
+echo "  ayuchan-app-store          应用商店（安装软件）"
 echo "  systemctl restart lightdm  重启显示管理器"
 echo "  ayuchan-install-check      安装环境诊断"
 EOF
@@ -43,6 +44,8 @@ cat > /etc/motd << 'EOF'
 
   黑屏: Ctrl+Alt+F2 登录后执行 ayuchan-rescue
   安装: 双击「Install Ayuchan Linux」或终端执行 ayuchan-install-gui
+  组件: 安装时可选择「最小化/最大化/开发/办公/无桌面」方案
+  商店: 双击「Ayuchan App Store」或终端执行 ayuchan-app-store
   诊断: ayuchan-install-check
 
 EOF

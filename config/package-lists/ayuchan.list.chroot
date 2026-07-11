@@ -64,5 +64,8 @@ xserver-xorg-input-all
 x11-utils
 x11-xserver-utils
 
+# 应用商店
+python3
+
 # 常用依赖
 libu2f-udev
