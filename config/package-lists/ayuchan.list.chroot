@@ -41,7 +41,6 @@ dbus-x11
 # 中文
 fonts-noto-cjk
 fonts-noto-cjk-extra
-fonts-noto-serif-cjk
 locales
 im-config
 
