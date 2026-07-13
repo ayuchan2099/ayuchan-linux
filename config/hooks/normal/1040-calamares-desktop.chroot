@@ -12,16 +12,20 @@ SQUASH=""
 for p in \
   /run/live/medium/live/filesystem.squashfs \
   /lib/live/mount/medium/live/filesystem.squashfs \
-  /live/filesystem.squashfs; do
+  /run/live/findiso/live/filesystem.squashfs \
+  /lib/live/mount/findiso/live/filesystem.squashfs \
+  /live/filesystem.squashfs \
+  /run/live/medium/filesystem.squashfs \
+  /lib/live/mount/medium/filesystem.squashfs; do
   if [ -f "$p" ]; then
     SQUASH="$p"
     break
   fi
 done
 if [ -z "$SQUASH" ]; then
-  for base in /run/live/medium /lib/live/mount/medium; do
+  for base in /run/live/medium /lib/live/mount/medium /run/live/findiso /lib/live/mount/findiso /run/live; do
     if [ -d "$base" ]; then
-      found="$(find "$base" -maxdepth 4 -name 'filesystem.squashfs' -type f 2>/dev/null | head -1)"
+      found="$(find "$base" -maxdepth 5 -name 'filesystem.squashfs' -type f 2>/dev/null | head -1)"
       if [ -n "$found" ]; then
         SQUASH="$found"
         break
@@ -52,11 +56,14 @@ echo "用户: $(id -un)  DISPLAY=${DISPLAY:-未设置}"
 for p in \
   /run/live/medium/live/filesystem.squashfs \
   /lib/live/mount/medium/live/filesystem.squashfs \
+  /run/live/findiso/live/filesystem.squashfs \
+  /lib/live/mount/findiso/live/filesystem.squashfs \
   /lib/live/mount/medium/install/initrd.gz \
   /run/live/medium/install/initrd.gz; do
   if [ -e "$p" ]; then echo "[OK] $p"; else echo "[--] $p"; fi
 done
 echo "---"
+command -v unsquashfs >/dev/null && echo "unsquashfs: OK" || echo "[!!] unsquashfs: 未安装 (需要 squashfs-tools)"
 command -v calamares >/dev/null && calamares --version 2>/dev/null | head -1 || echo "calamares: 未安装"
 command -v debian-installer-launcher >/dev/null && echo "debian-installer-launcher: OK ($(command -v debian-installer-launcher))" \
   || { [ -x /usr/sbin/debian-installer-launcher ] && echo "debian-installer-launcher: OK (/usr/sbin/debian-installer-launcher)" \
@@ -73,6 +80,18 @@ else
   echo "[!!] 未找到 /etc/calamares/settings.conf"
 fi
 [ -f /etc/calamares/modules/unpackfs.conf ] && echo "--- unpackfs.conf ---" && cat /etc/calamares/modules/unpackfs.conf
+if [ -f /etc/calamares/modules/packagechooser.conf ]; then
+  if grep -q 'package: full' /etc/calamares/modules/packagechooser.conf; then
+    echo "[OK] packagechooser.conf 含 package 字段"
+  else
+    echo "[!!] packagechooser.conf 缺少 package 字段 — Calamares 3.2 会加载失败"
+  fi
+fi
+if [ -f /etc/calamares/branding/ayuchan/logo.svg ]; then
+  echo "[OK] Calamares 品牌图标存在"
+else
+  echo "[!!] 缺少 /etc/calamares/branding/ayuchan/logo.svg"
+fi
 echo "--- 建议 ---"
 echo "图形安装: ayuchan-install-gui"
 echo "文本安装: ayuchan-install-text  或 GRUB 菜单选 Install"
@@ -124,8 +143,9 @@ fi
 calamares 2>&1 | tee "$LOG"
 status=${PIPESTATUS[0]}
 if [ "$status" -ne 0 ]; then
-  zenity --error --text="Calamares 启动失败 (代码 $status)\n日志: $LOG" 2>/dev/null \
-    || xfce4-terminal -e "echo 安装器失败; tail -20 '$LOG'; read"
+  err_detail="$(tail -15 "$LOG" 2>/dev/null | tr '\n' ' ')"
+  zenity --error --width=520 --text="Calamares 启动失败 (代码 $status)\n\n常见原因:\n• 安装组件配置错误\n• 未找到 squashfs 镜像\n• 缺少 unsquashfs 工具\n\n日志: $LOG\n\n最近输出:\n${err_detail}" 2>/dev/null \
+    || xfce4-terminal -e "echo 安装器失败; tail -30 '$LOG'; read"
 fi
 exit "$status"
 EOF

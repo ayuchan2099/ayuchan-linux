@@ -4,6 +4,11 @@ componentName: ayuchan
 welcomeStyleCalamares: true
 welcomeExpandingLogo: true
 
+images:
+  product.logo: "logo.svg"
+  product.icon: "logo.svg"
+  product.welcome: "logo.svg"
+
 strings:
     productName: Ayuchan Linux
     shortProductName: Ayuchan

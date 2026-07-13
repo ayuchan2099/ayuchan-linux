@@ -204,9 +204,9 @@ PY
       --width=640 --height=420 \
       --text="选择要查看或安装的应用:" \
       --column="ID" --column="应用" --column="状态" --column="简介" \
-      --hide-column=1 2>/dev/null)" || return
+      --hide-column=1 --print-column=1 2>/dev/null)" || return
 
-    local app_id="${selection%%|*}"
+    local app_id="$selection"
     show_app_detail "$cat_id" "$app_id"
   done
 }
@@ -229,15 +229,24 @@ PY
       --title="$TITLE" --width=480 --height=400 \
       --text="欢迎使用 Ayuchan 应用商店\n浏览分类，一键安装常用软件。" \
       --column="ID" --column="分类" --column="说明" \
-      --hide-column=1 2>/dev/null)" || exit 0
+      --hide-column=1 --print-column=1 2>/dev/null)" || exit 0
 
-    local choice_id="${selection%%|*}"
-    local choice_name
-    choice_name="$(echo "$selection" | cut -d'|' -f2)"
+    local choice_id="$selection"
 
     if [ "$choice_id" = "搜索" ]; then
       show_search
     else
+      local choice_name
+      choice_name="$(python3 - "$CATALOG" "$choice_id" << 'PY'
+import json, sys
+with open(sys.argv[1], encoding="utf-8") as f:
+    data = json.load(f)
+for cat in data["categories"]:
+    if cat["id"] == sys.argv[2]:
+        print(cat["name"])
+        break
+PY
+)"
       show_category "$choice_id" "$choice_name"
     fi
   done

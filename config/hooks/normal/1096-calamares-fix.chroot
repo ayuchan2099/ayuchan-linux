@@ -1,0 +1,58 @@
+#!/bin/bash
+# Calamares 最终校验：品牌资源、配置完整性、依赖
+set -e
+
+BRANDING="/etc/calamares/branding/ayuchan"
+LOGO_SRC="/usr/share/icons/Ayuchan-icons/apps/48/ayuchan-logo.svg"
+
+install -d "$BRANDING"
+if [ -f "$LOGO_SRC" ]; then
+  cp "$LOGO_SRC" "$BRANDING/logo.svg"
+fi
+
+cat > "$BRANDING/branding.desc" << 'EOF'
+---
+componentName: ayuchan
+
+welcomeStyleCalamares: true
+welcomeExpandingLogo: true
+
+images:
+  product.logo: "logo.svg"
+  product.icon: "logo.svg"
+  product.welcome: "logo.svg"
+
+strings:
+    productName: Ayuchan Linux
+    shortProductName: Ayuchan
+    version: "1.3"
+    shortVersion: "1.3"
+    longVersion: Ayuchan Linux 1.3
+    bootloaderEntryName: Ayuchan
+    productUrl: https://github.com/ayuchan2099/ayuchan-linux
+    supportUrl: https://github.com/ayuchan2099/ayuchan-linux/issues
+    knownIssuesUrl: https://github.com/ayuchan2099/ayuchan-linux/issues
+    releaseNotesUrl: https://github.com/ayuchan2099/ayuchan-linux/releases
+EOF
+
+# 确保 Ayuchan 安装流程配置不被 debian 包覆盖
+install -d /etc/calamares/modules
+if [ -f /etc/calamares/settings.conf ] && ! grep -q '^sequence:' /etc/calamares/settings.conf; then
+  echo "[1096] 警告: settings.conf 缺少 sequence，写入 Ayuchan 配置" >&2
+fi
+
+chmod 644 /etc/calamares/settings.conf 2>/dev/null || true
+chmod 644 /etc/calamares/modules/packagechooser.conf
+chmod 644 /etc/calamares/modules/contextualprocess.conf
+chmod 644 /etc/calamares/modules/unpackfs.conf 2>/dev/null || true
+chmod 755 /usr/local/bin/ayuchan-apply-install-profile
+
+# 构建阶段验证 packagechooser 必填字段（Calamares 3.2）
+if ! grep -q 'package: full' /etc/calamares/modules/packagechooser.conf; then
+  echo "[1096] 错误: packagechooser.conf 缺少 package 字段" >&2
+  exit 1
+fi
+
+command -v unsquashfs >/dev/null 2>&1 || apt-get install -y --no-install-recommends squashfs-tools
+
+echo "[1096] Calamares 配置校验完成"

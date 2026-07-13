@@ -1,6 +1,6 @@
 #!/bin/bash
 # Ayuchan Linux — 根据安装方案调整目标系统软件包
-set -euo pipefail
+set -uo pipefail
 
 PROFILE="${1:-full}"
 export DEBIAN_FRONTEND=noninteractive
@@ -15,14 +15,20 @@ has_network() {
 
 apt_update() {
   log "更新软件源..."
-  apt-get update -qq
+  apt-get update -qq || {
+    log "警告: apt-get update 失败，继续尝试安装/卸载"
+    return 1
+  }
 }
 
 apt_install() {
   local pkgs=("$@")
   [ "${#pkgs[@]}" -gt 0 ] || return 0
   log "安装: ${pkgs[*]}"
-  apt-get install -y --no-install-recommends "${pkgs[@]}"
+  apt-get install -y --no-install-recommends "${pkgs[@]}" || {
+    log "警告: 部分软件包安装失败"
+    return 1
+  }
 }
 
 apt_remove() {
